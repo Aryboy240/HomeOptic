@@ -54,6 +54,7 @@ class Appointment extends Model
      */
     public function scopeForDateRange(Builder $query, Carbon $from, Carbon $to): Builder
     {
-        return $query->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
+        return $query->whereDate('date', '>=', $from->toDateString())
+                     ->whereDate('date', '<=', $to->toDateString());
     }
 }

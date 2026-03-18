@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('examination_id')->unique()->constrained()->cascadeOnDelete();
 
             // GOS section
-            $table->string('gos_eligibility');
+            $table->string('gos_eligibility')->nullable();
             $table->string('gos_establishment_name')->nullable();
             $table->string('gos_establishment_town')->nullable();
 
