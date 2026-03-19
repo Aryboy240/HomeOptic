@@ -92,10 +92,63 @@
                         @csrf
                         <input type="hidden" name="diary_id" value="{{ $diary->id }}">
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Patient ID</label>
-                                <input type="number" name="patient_id" required placeholder="Patient ID"
-                                    class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <div x-data="{
+                                query: '',
+                                patientId: null,
+                                results: [],
+                                open: false,
+                                loading: false,
+                                async fetchResults() {
+                                    this.patientId = null;
+                                    if (this.query.trim().length < 1) { this.results = []; this.open = false; return; }
+                                    this.loading = true;
+                                    const res = await fetch('{{ route('patients.search') }}?q=' + encodeURIComponent(this.query));
+                                    this.results = await res.json();
+                                    this.loading = false;
+                                    this.open = this.results.length > 0;
+                                },
+                                select(patient) {
+                                    this.query = patient.first_name + ' ' + patient.surname;
+                                    this.patientId = patient.id;
+                                    this.open = false;
+                                    this.results = [];
+                                },
+                                clear() {
+                                    if (!this.patientId) return;
+                                    this.patientId = null;
+                                }
+                            }" class="relative col-span-2">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Patient</label>
+                                <input type="text"
+                                    x-model="query"
+                                    @input.debounce.250ms="fetchResults()"
+                                    @keydown.escape="open = false"
+                                    @focus="open = results.length > 0"
+                                    @click="clear()"
+                                    placeholder="Search by name or ID…"
+                                    autocomplete="off"
+                                    class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                    :class="{ 'border-indigo-400 ring-1 ring-indigo-300': patientId }">
+                                <input type="hidden" name="patient_id" :value="patientId">
+
+                                {{-- Dropdown --}}
+                                <div x-show="open" x-cloak @click.outside="open = false"
+                                    class="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                                    <template x-for="patient in results" :key="patient.id">
+                                        <button type="button" @click="select(patient)"
+                                            class="w-full text-left px-3 py-2 text-sm hover:bg-indigo-50 flex items-baseline justify-between gap-2">
+                                            <span>
+                                                <span x-text="patient.first_name + ' ' + patient.surname" class="font-medium text-gray-800"></span>
+                                                <span x-text="'DOB ' + patient.date_of_birth" class="ml-2 text-xs text-gray-500"></span>
+                                            </span>
+                                            <span x-text="'#' + patient.id" class="text-xs text-gray-400 shrink-0"></span>
+                                        </button>
+                                    </template>
+                                </div>
+
+                                {{-- Selected / loading state --}}
+                                <p x-show="patientId" class="mt-0.5 text-xs text-indigo-600 font-medium" x-text="'Patient #' + patientId + ' selected'"></p>
+                                <p x-show="loading && !patientId" class="mt-0.5 text-xs text-gray-400">Searching…</p>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Date</label>

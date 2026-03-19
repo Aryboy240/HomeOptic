@@ -37,5 +37,10 @@ class DatabaseSeeder extends Seeder
         Diary::firstOrCreate(
             ['name' => 'Main Diary'],
         );
+
+        $this->call([
+            DoctorSeeder::class,
+            PctSeeder::class,
+        ]);
     }
 }

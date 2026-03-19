@@ -6,12 +6,14 @@ use App\Contracts\PatientRepositoryInterface;
 use App\Enums\DomiciliaryReason;
 use App\Enums\DroppedReason;
 use App\Enums\HowHeard;
+use App\Enums\PatientTitle;
 use App\Enums\PatientType;
 use App\Enums\SexGender;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Pct;
 use App\Models\Practice;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -27,18 +29,53 @@ class PatientController extends Controller
      */
     public function index(Request $request): View
     {
-        $results = null;
-
-        if ($request->hasAny(['first_name', 'surname', 'patient_id', 'date_of_birth',
-            'post_code', 'sex_gender', 'patient_type', 'has_glaucoma', 'is_diabetic'])) {
-            $results = $this->patients->search($request->all());
-        }
+        // Merge so that 'id_desc' (Latest) is the default when no sort param is present.
+        $results = $this->patients->search(
+            array_merge(['sort' => 'id_desc'], $request->all())
+        );
 
         return view('patients.index', [
             'results'      => $results,
             'sexGenders'   => SexGender::options(),
             'patientTypes' => PatientType::options(),
         ]);
+    }
+
+    /**
+     * Live patient search — returns up to 10 matching patients as JSON.
+     * Searches by name (first_name / surname) or by exact ID when q is numeric.
+     * Used by the diary quick-book Alpine.js autocomplete.
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $q = trim($request->string('q'));
+
+        if ($q === '') {
+            return response()->json([]);
+        }
+
+        $query = Patient::active()->limit(10);
+
+        if (ctype_digit($q)) {
+            $query->where('id', (int) $q);
+        } else {
+            $query->where(function ($q2) use ($q) {
+                $q2->where('first_name', 'like', '%' . $q . '%')
+                   ->orWhere('surname',    'like', '%' . $q . '%');
+            });
+        }
+
+        $patients = $query->orderBy('surname')->orderBy('first_name')
+            ->get(['id', 'first_name', 'surname', 'date_of_birth']);
+
+        return response()->json(
+            $patients->map(fn ($p) => [
+                'id'            => $p->id,
+                'first_name'    => $p->first_name,
+                'surname'       => $p->surname,
+                'date_of_birth' => $p->date_of_birth->format('d/m/Y'),
+            ])
+        );
     }
 
     /**
@@ -166,6 +203,7 @@ class PatientController extends Controller
     private function formData(): array
     {
         return [
+            'titles'             => PatientTitle::options(),
             'practices'          => Practice::orderBy('name')->pluck('name', 'id'),
             'doctors'            => Doctor::orderBy('name')->pluck('name', 'id'),
             'pcts'               => Pct::orderBy('name')->pluck('name', 'id'),

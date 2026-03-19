@@ -71,22 +71,31 @@
                             </label>
                         </div>
                     </div>
-                    <div class="mt-4 flex gap-2">
+                    <div class="mt-4 flex items-center gap-3">
                         <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700">Search</button>
                         <a href="{{ route('patients.index') }}" class="px-4 py-2 bg-white text-gray-700 text-sm font-medium border border-gray-300 rounded-md hover:bg-gray-50">Clear</a>
+                        <div class="ml-auto flex items-center gap-2">
+                            <label class="text-xs font-medium text-gray-600 whitespace-nowrap">Sort by</label>
+                            <select name="sort" onchange="this.form.submit()"
+                                class="text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="id_desc"    @selected(request('sort', 'id_desc') === 'id_desc')>Latest</option>
+                                <option value="id_asc"     @selected(request('sort') === 'id_asc')>Oldest</option>
+                                <option value="surname_asc"  @selected(request('sort') === 'surname_asc')>Surname A–Z</option>
+                                <option value="surname_desc" @selected(request('sort') === 'surname_desc')>Surname Z–A</option>
+                            </select>
+                        </div>
                     </div>
                 </form>
             </div>
 
             {{-- Results --}}
-            @if($results !== null)
-                <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
-                    @if($results->isEmpty())
-                        <p class="text-gray-500 text-center py-10">No patients found matching your search.</p>
-                    @else
-                        <div class="px-5 py-3 border-b border-gray-100 text-sm text-gray-600">
-                            {{ $results->total() }} {{ Str::plural('patient', $results->total()) }} found
-                        </div>
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                @if($results->isEmpty())
+                    <p class="text-gray-500 text-center py-10">No patients found matching your search.</p>
+                @else
+                    <div class="px-5 py-3 border-b border-gray-100 text-sm text-gray-600">
+                        {{ $results->total() }} {{ Str::plural('patient', $results->total()) }} found
+                    </div>
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="bg-gray-50 border-b border-gray-200">
@@ -129,9 +138,8 @@
                         <div class="px-4 py-3 border-t border-gray-100">
                             {{ $results->withQueryString()->links() }}
                         </div>
-                    @endif
-                </div>
-            @endif
+                @endif
+            </div>
 
         </div>
     </div>

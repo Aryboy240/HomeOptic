@@ -11,8 +11,13 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
             <x-input-label for="title" value="Title *" />
-            <x-text-input id="title" name="title" type="text" class="mt-1 block w-full" required
-                value="{{ old('title', $patient?->title) }}" maxlength="20" />
+            <select id="title" name="title" required
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                <option value="">— Select —</option>
+                @foreach($titles as $value => $label)
+                    <option value="{{ $value }}" @selected(old('title', $patient?->title) === $value)>{{ $label }}</option>
+                @endforeach
+            </select>
             <x-input-error :messages="$errors->get('title')" class="mt-1" />
         </div>
         <div>
@@ -169,7 +174,7 @@
             <x-input-error :messages="$errors->get('pct_id')" class="mt-1" />
         </div>
         <div>
-            <x-input-label for="how_heard" value="How Heard Of Us" />
+            <x-input-label for="how_heard" value="How did you hear of us?" />
             <select id="how_heard" name="how_heard"
                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
                 <option value="">— Select —</option>
@@ -180,7 +185,7 @@
             <x-input-error :messages="$errors->get('how_heard')" class="mt-1" />
         </div>
         <div>
-            <x-input-label for="how_heard_other" value="How Heard (other)" />
+            <x-input-label for="how_heard_other" value="How did you hear of us? (other)" />
             <x-text-input id="how_heard_other" name="how_heard_other" type="text" class="mt-1 block w-full"
                 value="{{ old('how_heard_other', $patient?->how_heard_other) }}" />
             <x-input-error :messages="$errors->get('how_heard_other')" class="mt-1" />
