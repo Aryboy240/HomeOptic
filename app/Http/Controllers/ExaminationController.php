@@ -13,7 +13,9 @@ use App\Models\Examination;
 use App\Models\Patient;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExaminationController extends Controller
 {
@@ -285,6 +287,21 @@ class ExaminationController extends Controller
 
         return redirect()->route('examinations.show', $examination)
             ->with('success', 'Refraction saved.');
+    }
+
+    /**
+     * Download the generated PDF report for a signed examination.
+     */
+    public function report(Examination $examination): StreamedResponse
+    {
+        abort_if(is_null($examination->report_path), 404, 'Report not yet generated.');
+        abort_unless(Storage::disk('local')->exists($examination->report_path), 404, 'Report file not found.');
+
+        $filename = 'examination-' . $examination->id . '-' . $examination->patient->surname . '.pdf';
+
+        return Storage::disk('local')->download($examination->report_path, $filename, [
+            'Content-Type' => 'application/pdf',
+        ]);
     }
 
     /**

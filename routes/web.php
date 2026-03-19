@@ -47,6 +47,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/examinations/{examination}/investigative', [ExaminationController::class, 'updateInvestigative'])->name('examinations.investigative.update');
     Route::put('/examinations/{examination}/refraction', [ExaminationController::class, 'updateRefraction'])->name('examinations.refraction.update');
     Route::patch('/examinations/{examination}/sign', [ExaminationController::class, 'sign'])->name('examinations.sign');
+    Route::get('/examinations/{examination}/report', [ExaminationController::class, 'report'])->name('examinations.report');
 });
 
 require __DIR__.'/auth.php';

@@ -156,6 +156,7 @@
                                         <th class="text-left px-4 py-2 font-medium text-gray-600">Type</th>
                                         <th class="text-left px-4 py-2 font-medium text-gray-600">Examiner</th>
                                         <th class="text-left px-4 py-2 font-medium text-gray-600">Signed</th>
+                                        <th class="text-left px-4 py-2 font-medium text-gray-600">Report</th>
                                         <th class="px-4 py-2"></th>
                                     </tr>
                                 </thead>
@@ -172,6 +173,18 @@
                                                     </span>
                                                 @else
                                                     <span class="text-gray-400 text-xs">Unsigned</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                @if($exam->report_path)
+                                                    <a href="{{ route('examinations.report', $exam) }}"
+                                                       class="text-xs font-medium text-green-700 hover:text-green-900 hover:underline">
+                                                        Download PDF
+                                                    </a>
+                                                @else
+                                                    <span class="text-xs text-gray-300">
+                                                        {{ $exam->signed_at ? 'Generating…' : 'Not signed' }}
+                                                    </span>
                                                 @endif
                                             </td>
                                             <td class="px-4 py-2 text-right">
