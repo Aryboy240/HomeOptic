@@ -239,6 +239,7 @@ class PatientController extends Controller
         ]);
 
         $this->patients->update($patient, $validated);
+        $patient->refresh();
 
         $gos = app(GosEligibilityService::class);
         foreach (['GOS1' => $gos->isEligibleGos1($patient),
@@ -252,6 +253,30 @@ class PatientController extends Controller
 
         return redirect()->route('patients.show', $patient)
             ->with('success', 'Patient updated successfully.');
+    }
+
+    /**
+     * Delete a patient and all their related records.
+     *
+     * Blocked if the patient has any signed examinations.
+     * Explicitly deletes examinations (cascades to child tables) and appointments
+     * before removing the patient, for SQLite FK compatibility.
+     */
+    public function destroy(Patient $patient): RedirectResponse
+    {
+        if ($patient->examinations()->whereNotNull('signed_at')->exists()) {
+            return redirect()->route('patients.show', $patient)
+                ->with('error', 'Cannot delete — this patient has signed examination records.');
+        }
+
+        // Delete examinations first (exam child rows cascade via DB FK).
+        // Then appointments. Then the patient (gos_forms cascade via DB FK).
+        $patient->examinations()->delete();
+        $patient->appointments()->delete();
+        $patient->delete();
+
+        return redirect()->route('patients.index')
+            ->with('success', 'Patient deleted successfully.');
     }
 
     // -------------------------------------------------------------------------

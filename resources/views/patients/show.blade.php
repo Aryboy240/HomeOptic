@@ -18,6 +18,23 @@
                    class="inline-flex items-center px-4 py-2 bg-white text-gray-700 text-sm font-medium border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">
                     Edit Details
                 </a>
+                @php $hasSigned = $examinations->whereNotNull('signed_at')->isNotEmpty(); @endphp
+                @if($hasSigned)
+                    <span title="Cannot delete — this patient has signed examination records."
+                          class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-400 text-sm font-medium border border-gray-200 rounded-md cursor-not-allowed select-none">
+                        Delete Patient
+                    </span>
+                @else
+                    <form method="POST" action="{{ route('patients.destroy', $patient) }}">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                                class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-red-700"
+                                onclick="return confirm('Are you sure you want to permanently delete this patient? All their appointments, examinations and GOS forms will also be deleted. This cannot be undone.')">
+                            Delete Patient
+                        </button>
+                    </form>
+                @endif
                 <form method="POST" action="{{ route('examinations.store', $patient) }}">
                     @csrf
                     <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-indigo-700">

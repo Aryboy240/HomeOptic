@@ -302,7 +302,7 @@
                                              pxPerMin: {{ $pxPerMin }},
                                              gridStart: {{ $gridStart }},
                                              gridEnd:   {{ $gridEnd }},
-                                             snapMin:   5,
+                                             snapMin:   10,
                                              hoverTop:  -1,
                                              hoverFree: true,
                                              appts: [],
@@ -320,8 +320,10 @@
                                                  return !this.appts.some(a => a.s < e && a.e > m);
                                              },
                                              onMove(ev) {
-                                                 const y = ev.clientY - this.$el.getBoundingClientRect().top;
+                                                 const rect = this.$el.getBoundingClientRect();
+                                                 const y = ev.clientY - rect.top;
                                                  const m = this.toMins(y);
+                                                 console.log('[week] clientY:', ev.clientY, 'rect.top:', rect.top, 'y:', y, 'snapped mins:', m);
                                                  if (m < this.gridStart || m >= this.gridEnd) { this.hoverTop = -1; return; }
                                                  this.hoverTop  = (m - this.gridStart) * this.pxPerMin;
                                                  this.hoverFree = this.isFree(m);
@@ -329,7 +331,8 @@
                                              onLeave() { this.hoverTop = -1; },
                                              onClick(ev) {
                                                  if (this.hoverTop < 0 || !this.hoverFree) return;
-                                                 const y = ev.clientY - this.$el.getBoundingClientRect().top;
+                                                 const rect = this.$el.getBoundingClientRect();
+                                                 const y = ev.clientY - rect.top;
                                                  const m = this.toMins(y);
                                                  if (m < this.gridStart || m >= this.gridEnd) return;
                                                  const hh = String(Math.floor(m / 60)).padStart(2, '0');
@@ -409,7 +412,7 @@
                                          pxPerMin: {{ $pxPerMin }},
                                          gridStart: {{ $gridStart }},
                                          gridEnd:   {{ $gridEnd }},
-                                         snapMin:   5,
+                                         snapMin:   10,
                                          hoverTop:  -1,
                                          hoverFree: true,
                                          appts: [],
@@ -427,8 +430,10 @@
                                              return !this.appts.some(a => a.s < e && a.e > m);
                                          },
                                          onMove(ev) {
-                                             const y = ev.clientY - this.$el.getBoundingClientRect().top;
+                                             const rect = this.$el.getBoundingClientRect();
+                                             const y = ev.clientY - rect.top;
                                              const m = this.toMins(y);
+                                             console.log('[day] clientY:', ev.clientY, 'rect.top:', rect.top, 'y:', y, 'snapped mins:', m);
                                              if (m < this.gridStart || m >= this.gridEnd) { this.hoverTop = -1; return; }
                                              this.hoverTop  = (m - this.gridStart) * this.pxPerMin;
                                              this.hoverFree = this.isFree(m);
@@ -436,7 +441,8 @@
                                          onLeave() { this.hoverTop = -1; },
                                          onClick(ev) {
                                              if (this.hoverTop < 0 || !this.hoverFree) return;
-                                             const y = ev.clientY - this.$el.getBoundingClientRect().top;
+                                             const rect = this.$el.getBoundingClientRect();
+                                             const y = ev.clientY - rect.top;
                                              const m = this.toMins(y);
                                              if (m < this.gridStart || m >= this.gridEnd) return;
                                              const hh = String(Math.floor(m / 60)).padStart(2, '0');

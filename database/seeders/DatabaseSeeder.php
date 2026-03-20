@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
         User::firstOrCreate(
             ['email' => 'p.kora@sky.com'],
             [
-                'name'     => 'HomeOptic Admin',
+                'name'     => 'Prem Kora',
                 'password' => Hash::make('password'),
             ]
         );
