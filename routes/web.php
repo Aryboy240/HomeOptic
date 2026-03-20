@@ -4,6 +4,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\DiaryController;
 use App\Http\Controllers\ExaminationController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\PatientGosFormController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +40,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
     Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
 
+    // ── GOS Forms ────────────────────────────────────────────────────────────
+    Route::post('/patients/{patient}/gos/{formType}', [PatientGosFormController::class, 'update'])->name('patients.gos.update');
+    Route::delete('/patients/{patient}/gos/{formType}/override', [PatientGosFormController::class, 'clearOverride'])->name('patients.gos.clear');
+
     // ── Examinations ─────────────────────────────────────────────────────────
     Route::post('/patients/{patient}/examinations', [ExaminationController::class, 'store'])->name('examinations.store');
     Route::get('/examinations/{examination}', [ExaminationController::class, 'show'])->name('examinations.show');
@@ -47,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/examinations/{examination}/investigative', [ExaminationController::class, 'updateInvestigative'])->name('examinations.investigative.update');
     Route::put('/examinations/{examination}/refraction', [ExaminationController::class, 'updateRefraction'])->name('examinations.refraction.update');
     Route::patch('/examinations/{examination}/sign', [ExaminationController::class, 'sign'])->name('examinations.sign');
+    Route::delete('/examinations/{examination}', [ExaminationController::class, 'destroy'])->name('examinations.destroy');
     Route::get('/examinations/{examination}/report', [ExaminationController::class, 'report'])->name('examinations.report');
 });
 

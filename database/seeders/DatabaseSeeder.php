@@ -14,14 +14,14 @@ class DatabaseSeeder extends Seeder
      * Seed the application's database.
      *
      * Credentials for the default admin account:
-     *   Email:    admin@homeoptic.test
+     *   Email:    p.kora@sky.com
      *   Password: password
      */
     public function run(): void
     {
         // Default optometrist / admin account
         User::firstOrCreate(
-            ['email' => 'admin@homeoptic.test'],
+            ['email' => 'p.kora@sky.com'],
             [
                 'name'     => 'HomeOptic Admin',
                 'password' => Hash::make('password'),

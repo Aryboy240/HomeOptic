@@ -142,8 +142,10 @@ class ExaminationController extends Controller
             'drops_more_info'            => ['nullable', 'string'],
             'pre_iop_r'                  => ['nullable', 'string', 'max:20'],
             'pre_iop_l'                  => ['nullable', 'string', 'max:20'],
+            'pre_iop_time'               => ['nullable', 'string', 'max:8'],
             'post_iop_r'                 => ['nullable', 'string', 'max:20'],
             'post_iop_l'                 => ['nullable', 'string', 'max:20'],
+            'post_iop_time'              => ['nullable', 'string', 'max:8'],
             'ct_with_rx'                 => ['nullable', 'string', 'max:255'],
             'ct_with_rx_near'            => ['nullable', 'string', 'max:255'],
             'ct_with_rx_near_notes'      => ['nullable', 'string'],
@@ -302,6 +304,20 @@ class ExaminationController extends Controller
         return Storage::disk('local')->download($examination->report_path, $filename, [
             'Content-Type' => 'application/pdf',
         ]);
+    }
+
+    /**
+     * Delete an unsigned examination and its child tab records (cascade handles children).
+     */
+    public function destroy(Examination $examination): RedirectResponse
+    {
+        abort_unless(is_null($examination->signed_at), 403, 'Signed examinations cannot be deleted.');
+
+        $patient = $examination->patient;
+        $examination->delete();
+
+        return redirect()->route('patients.show', $patient)
+            ->with('success', 'Examination deleted.');
     }
 
     /**

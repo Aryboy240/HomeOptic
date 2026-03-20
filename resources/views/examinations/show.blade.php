@@ -114,21 +114,53 @@
                     <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-5 mb-4">
                         <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">History</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            @foreach([
-                                'reason_for_visit' => 'Reason for Visit',
-                                'poh'              => 'Past Ocular History (POH)',
-                                'gh'               => 'General Health (GH)',
-                                'medication_notes' => 'Medication Notes',
-                                'fh'               => 'Family History (FH)',
-                                'foh'              => 'Family Ocular History (FOH)',
-                                'other_notes'      => 'Other Notes',
-                            ] as $field => $label)
-                                <div>
-                                    <x-input-label :for="$field" :value="$label" />
-                                    <textarea :id="$field" name="{{ $field }}" rows="2"
-                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old($field, $hs?->$field) }}</textarea>
-                                </div>
-                            @endforeach
+                            <div>
+                                <x-input-label for="reason_for_visit" value="Reason for Visit" />
+                                <textarea id="reason_for_visit" name="reason_for_visit" rows="2" x-ref="reason_for_visit"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('reason_for_visit', $hs?->reason_for_visit) }}</textarea>
+                                <button type="button" @click="$refs.reason_for_visit.value = 'Last test c/o blurry DV / NV\nNo headaches, diplopia or pain\nNo flashes, floaters, shadows or any other symptoms\nPhotosensitivity no'"
+                                    class="mt-1 text-xs text-gray-400 hover:text-gray-600">Set default</button>
+                            </div>
+                            <div>
+                                <x-input-label for="poh" value="Past Ocular History (POH)" />
+                                <textarea id="poh" name="poh" rows="2" x-ref="poh"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('poh', $hs?->poh) }}</textarea>
+                                <button type="button" @click="$refs.poh.value = 'No HES\nno squints or lazy eye\nno infections, ops or injuries\nno cats or glauc'"
+                                    class="mt-1 text-xs text-gray-400 hover:text-gray-600">Set default</button>
+                            </div>
+                            <div>
+                                <x-input-label for="gh" value="General Health (GH)" />
+                                <textarea id="gh" name="gh" rows="2" x-ref="gh"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('gh', $hs?->gh) }}</textarea>
+                                <button type="button" @click="$refs.gh.value = 'No Heath issues\nNo T1/T2 Diabetes'"
+                                    class="mt-1 text-xs text-gray-400 hover:text-gray-600">Set default</button>
+                            </div>
+                            <div>
+                                <x-input-label for="medication_notes" value="Medication Notes" />
+                                <textarea id="medication_notes" name="medication_notes" rows="2" x-ref="medication_notes"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('medication_notes', $hs?->medication_notes) }}</textarea>
+                                <button type="button" @click="$refs.medication_notes.value = 'Nil'"
+                                    class="mt-1 text-xs text-gray-400 hover:text-gray-600">Set default</button>
+                            </div>
+                            <div>
+                                <x-input-label for="fh" value="Family History (FH)" />
+                                <textarea id="fh" name="fh" rows="2" x-ref="fh"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('fh', $hs?->fh) }}</textarea>
+                                <button type="button" @click="$refs.fh.value = 'No T1/T2 Diabetes'"
+                                    class="mt-1 text-xs text-gray-400 hover:text-gray-600">Set default</button>
+                            </div>
+                            <div>
+                                <x-input-label for="foh" value="Family Ocular History (FOH)" />
+                                <textarea id="foh" name="foh" rows="2" x-ref="foh"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('foh', $hs?->foh) }}</textarea>
+                                <button type="button" @click="$refs.foh.value = 'No FH of Glaucoma\nNo FH of AMD\nNo FH of Strabismus\nNo Amblyopia or any other eye conditions'"
+                                    class="mt-1 text-xs text-gray-400 hover:text-gray-600">Set default</button>
+                            </div>
+                            <div>
+                                <x-input-label for="other_notes" value="Other Notes" />
+                                <textarea id="other_notes" name="other_notes" rows="2"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('other_notes', $hs?->other_notes) }}</textarea>
+                            </div>
                         </div>
 
                         <div class="mt-4 flex flex-wrap gap-6">
@@ -168,39 +200,83 @@
                     @method('PUT')
                     @php $oph = $examination->ophthalmoscopy; @endphp
 
-                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-5 mb-4">
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-5 mb-4"
+                         x-data="{
+                             copyRtoL() {
+                                 const fields = ['pupils','lids_lashes','lashes','conjunc','cornea','sclera','ant_ch','media','cd','av','fundus_periphery','macular','ret_grading'];
+                                 fields.forEach(f => {
+                                     const r = document.querySelector('[name=right_' + f + ']');
+                                     const l = document.querySelector('[name=left_'  + f + ']');
+                                     if (r && l) l.value = r.value;
+                                 });
+                             }
+                         }">
                         <div class="mb-4">
-                            <x-input-label for="ophthalmoscopy_notes" value="General Notes" />
+                            <x-input-label for="ophthalmoscopy_notes" value="Test Method" />
                             <textarea id="ophthalmoscopy_notes" name="ophthalmoscopy_notes" rows="3"
                                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('ophthalmoscopy_notes', $oph?->ophthalmoscopy_notes) }}</textarea>
                         </div>
 
-                        @foreach(['right' => 'Right Eye (R)', 'left' => 'Left Eye (L)'] as $side => $sideLabel)
-                            <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3 mt-5">{{ $sideLabel }}</h3>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                @foreach([
-                                    'pupils'          => 'Pupils',
-                                    'lids_lashes'     => 'Lids & Lashes',
-                                    'conjunc'         => 'Conjunctiva',
-                                    'cornea'          => 'Cornea',
-                                    'sclera'          => 'Sclera',
-                                    'ant_ch'          => 'Anterior Chamber',
-                                    'media'           => 'Media',
-                                    'cd'              => 'C/D Ratio',
-                                    'av'              => 'A/V Ratio',
-                                    'fundus_periphery'=> 'Fundus Periphery',
-                                    'macular'         => 'Macular',
-                                    'ret_grading'     => 'Ret. Grading',
-                                ] as $field => $label)
-                                    @php $name = "{$side}_{$field}"; @endphp
-                                    <div>
-                                        <x-input-label :for="$name" :value="$label" />
-                                        <x-text-input :id="$name" :name="$name" type="text" class="mt-1 block w-full"
-                                            :value="old($name, $oph?->$name)" />
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endforeach
+                        {{-- Right Eye --}}
+                        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3 mt-5">Right Eye (R)</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            @foreach([
+                                'pupils'          => 'Pupils',
+                                'lids_lashes'     => 'Lids & Lashes',
+                                'conjunc'         => 'Conjunctiva',
+                                'cornea'          => 'Cornea',
+                                'sclera'          => 'Sclera',
+                                'ant_ch'          => 'Anterior Chamber',
+                                'media'           => 'Media',
+                                'cd'              => 'C/D Ratio',
+                                'av'              => 'A/V Ratio',
+                                'fundus_periphery'=> 'Fundus Periphery',
+                                'macular'         => 'Macular',
+                                'ret_grading'     => 'Ret. Grading',
+                            ] as $field => $label)
+                                @php $name = "right_{$field}"; @endphp
+                                <div>
+                                    <x-input-label :for="$name" :value="$label" />
+                                    <x-text-input :id="$name" :name="$name" type="text" class="mt-1 block w-full"
+                                        :value="old($name, $oph?->$name)" />
+                                </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Copy button --}}
+                        <div class="mt-4 flex items-center gap-2">
+                            <button type="button" @click="copyRtoL()"
+                                class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-md hover:bg-indigo-700">
+                                Copy Right &rarr; Left
+                            </button>
+                            <span class="text-xs text-gray-400">Copies all Right Eye values to Left Eye</span>
+                        </div>
+
+                        {{-- Left Eye --}}
+                        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3 mt-5">Left Eye (L)</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            @foreach([
+                                'pupils'          => 'Pupils',
+                                'lids_lashes'     => 'Lids & Lashes',
+                                'conjunc'         => 'Conjunctiva',
+                                'cornea'          => 'Cornea',
+                                'sclera'          => 'Sclera',
+                                'ant_ch'          => 'Anterior Chamber',
+                                'media'           => 'Media',
+                                'cd'              => 'C/D Ratio',
+                                'av'              => 'A/V Ratio',
+                                'fundus_periphery'=> 'Fundus Periphery',
+                                'macular'         => 'Macular',
+                                'ret_grading'     => 'Ret. Grading',
+                            ] as $field => $label)
+                                @php $name = "left_{$field}"; @endphp
+                                <div>
+                                    <x-input-label :for="$name" :value="$label" />
+                                    <x-text-input :id="$name" :name="$name" type="text" class="mt-1 block w-full"
+                                        :value="old($name, $oph?->$name)" />
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
 
                     <div class="flex justify-end">
@@ -238,23 +314,77 @@
                                     value="{{ old('drops_expiry', $inv?->drops_expiry?->toDateString()) }}" />
                             </div>
                             <div>
-                                <x-input-label for="drops_more_info" value="More Info" />
+                                <x-input-label for="drops_more_info" value="Drops Instilled" />
                                 <x-text-input id="drops_more_info" name="drops_more_info" type="text" class="mt-1 block w-full"
                                     value="{{ old('drops_more_info', $inv?->drops_more_info) }}" />
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-5 mb-4">
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-5 mb-4"
+                         x-data="{
+                             setNow(refName) {
+                                 const now = new Date();
+                                 const hh = String(now.getHours()).padStart(2, '0');
+                                 const mm = String(now.getMinutes()).padStart(2, '0');
+                                 const ss = String(now.getSeconds()).padStart(2, '0');
+                                 this.$refs[refName].value = hh + ':' + mm + ':' + ss;
+                             }
+                         }">
                         <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">IOP</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            @foreach(['pre_iop_r' => 'Pre IOP R', 'pre_iop_l' => 'Pre IOP L', 'post_iop_r' => 'Post IOP R', 'post_iop_l' => 'Post IOP L'] as $field => $label)
-                                <div>
-                                    <x-input-label :for="$field" :value="$label" />
-                                    <x-text-input :id="$field" :name="$field" type="text" class="mt-1 block w-full"
-                                        :value="old($field, $inv?->$field)" />
+
+                        {{-- Pre IOP --}}
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Pre IOP</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <x-input-label for="pre_iop_r" value="Pre IOP R" />
+                                <x-text-input id="pre_iop_r" name="pre_iop_r" type="text" class="mt-1 block w-full"
+                                    value="{{ old('pre_iop_r', $inv?->pre_iop_r) }}" />
+                            </div>
+                            <div>
+                                <x-input-label for="pre_iop_l" value="Pre IOP L" />
+                                <x-text-input id="pre_iop_l" name="pre_iop_l" type="text" class="mt-1 block w-full"
+                                    value="{{ old('pre_iop_l', $inv?->pre_iop_l) }}" />
+                            </div>
+                            <div>
+                                <x-input-label for="pre_iop_time" value="Time" />
+                                <div class="mt-1 flex items-center gap-2">
+                                    <x-text-input id="pre_iop_time" name="pre_iop_time" type="time" class="block w-full"
+                                        placeholder="HH:MM:SS" x-ref="pre_iop_time"
+                                        value="{{ old('pre_iop_time', $inv?->pre_iop_time) }}" />
+                                    <button type="button" @click="setNow('pre_iop_time')"
+                                        class="shrink-0 px-2.5 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-md hover:bg-indigo-700" style="padding: 0.375rem;">
+                                        Now
+                                    </button>
                                 </div>
-                            @endforeach
+                            </div>
+                        </div>
+
+                        {{-- Post IOP --}}
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Post IOP</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div>
+                                <x-input-label for="post_iop_r" value="Post IOP R" />
+                                <x-text-input id="post_iop_r" name="post_iop_r" type="text" class="mt-1 block w-full"
+                                    value="{{ old('post_iop_r', $inv?->post_iop_r) }}" />
+                            </div>
+                            <div>
+                                <x-input-label for="post_iop_l" value="Post IOP L" />
+                                <x-text-input id="post_iop_l" name="post_iop_l" type="text" class="mt-1 block w-full"
+                                    value="{{ old('post_iop_l', $inv?->post_iop_l) }}" />
+                            </div>
+                            <div>
+                                <x-input-label for="post_iop_time" value="Time" />
+                                <div class="mt-1 flex items-center gap-2">
+                                    <x-text-input id="post_iop_time" name="post_iop_time" type="time" class="block w-full"
+                                        placeholder="HH:MM:SS" x-ref="post_iop_time"
+                                        value="{{ old('post_iop_time', $inv?->post_iop_time) }}" />
+                                    <button type="button" @click="setNow('post_iop_time')"
+                                        class="shrink-0 px-2.5 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-md hover:bg-indigo-700" style="padding: 0.375rem;">
+                                        Now
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

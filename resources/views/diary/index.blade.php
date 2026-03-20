@@ -166,7 +166,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Date</label>
-                                <input type="date" name="date" required
+                                <input id="form-date" type="date" name="date" required
                                     value="{{ old('date', $anchorDate->toDateString()) }}"
                                     class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 @error('date') border-red-500 @enderror">
                                 @error('date')
@@ -175,7 +175,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
-                                <input type="time" name="start_time" required step="300"
+                                <input id="form-start-time" type="time" name="start_time" required step="300"
                                     value="{{ old('start_time') }}"
                                     class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 @error('start_time') border-red-500 @enderror">
                                 @error('start_time')
@@ -284,18 +284,80 @@
                             {{-- Day columns --}}
                             @if($viewMode === 'week')
                                 @foreach($days as $day)
-                                    @php $dayAppts = $byDate->get($day->toDateString(), collect()); @endphp
+                                    @php
+                                        $dayAppts     = $byDate->get($day->toDateString(), collect());
+                                        $dayApptsJson = $dayAppts
+                                            ->filter(fn($a) => !$a->cancelled_at)
+                                            ->map(function($a) {
+                                                $parts = explode(':', (string)$a->start_time);
+                                                $s = (int)$parts[0] * 60 + (int)$parts[1];
+                                                return ['s' => $s, 'e' => $s + $a->length_minutes];
+                                            })->values()->toJson();
+                                    @endphp
                                     <div class="flex-1 relative border-r border-gray-100 last:border-r-0 {{ $day->isToday() ? 'bg-indigo-50/20' : '' }}"
-                                         style="height: {{ $totalHeight }}px">
+                                         style="height: {{ $totalHeight }}px; cursor: crosshair"
+                                         data-appts="{{ $dayApptsJson }}"
+                                         data-date="{{ $day->toDateString() }}"
+                                         x-data="{
+                                             pxPerMin: {{ $pxPerMin }},
+                                             gridStart: {{ $gridStart }},
+                                             gridEnd:   {{ $gridEnd }},
+                                             snapMin:   5,
+                                             hoverTop:  -1,
+                                             hoverFree: true,
+                                             appts: [],
+                                             date: '',
+                                             init() {
+                                                 this.appts = JSON.parse(this.$el.dataset.appts || '[]');
+                                                 this.date  = this.$el.dataset.date || '';
+                                             },
+                                             toMins(y) {
+                                                 const raw = y / this.pxPerMin + this.gridStart;
+                                                 return Math.round(raw / this.snapMin) * this.snapMin;
+                                             },
+                                             isFree(m) {
+                                                 const e = m + this.snapMin;
+                                                 return !this.appts.some(a => a.s < e && a.e > m);
+                                             },
+                                             onMove(ev) {
+                                                 const y = ev.clientY - this.$el.getBoundingClientRect().top;
+                                                 const m = this.toMins(y);
+                                                 if (m < this.gridStart || m >= this.gridEnd) { this.hoverTop = -1; return; }
+                                                 this.hoverTop  = (m - this.gridStart) * this.pxPerMin;
+                                                 this.hoverFree = this.isFree(m);
+                                             },
+                                             onLeave() { this.hoverTop = -1; },
+                                             onClick(ev) {
+                                                 if (this.hoverTop < 0 || !this.hoverFree) return;
+                                                 const y = ev.clientY - this.$el.getBoundingClientRect().top;
+                                                 const m = this.toMins(y);
+                                                 if (m < this.gridStart || m >= this.gridEnd) return;
+                                                 const hh = String(Math.floor(m / 60)).padStart(2, '0');
+                                                 const mm = String(m % 60).padStart(2, '0');
+                                                 document.getElementById('form-date').value       = this.date;
+                                                 document.getElementById('form-start-time').value = hh + ':' + mm;
+                                                 const form = document.getElementById('new-appt-form');
+                                                 form.classList.remove('hidden');
+                                                 form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                             }
+                                         }"
+                                         @mousemove="onMove($event)"
+                                         @mouseleave="onLeave()"
+                                         @click="onClick($event)">
+
+                                        {{-- Hover highlight bar --}}
+                                        <div x-show="hoverTop >= 0"
+                                             :style="'position:absolute; left:0; right:0; pointer-events:none; top:' + hoverTop + 'px; height:' + (snapMin * pxPerMin) + 'px; background:' + (hoverFree ? 'rgba(134,239,172,0.45)' : 'rgba(252,165,165,0.45)')"></div>
+
                                         {{-- Hour grid lines --}}
                                         @for($min = $gridStart; $min <= $gridEnd; $min += 60)
-                                            <div class="absolute w-full border-t {{ $min === $gridStart ? 'border-gray-200' : 'border-gray-200' }}"
-                                                 style="top: {{ ($min - $gridStart) * $pxPerMin }}px"></div>
+                                            <div class="absolute w-full border-t border-gray-200"
+                                                 style="top: {{ ($min - $gridStart) * $pxPerMin }}px; pointer-events:none"></div>
                                         @endfor
                                         {{-- Half-hour lines --}}
                                         @for($min = $gridStart + 30; $min < $gridEnd; $min += 60)
                                             <div class="absolute w-full border-t border-gray-100"
-                                                 style="top: {{ ($min - $gridStart) * $pxPerMin }}px"></div>
+                                                 style="top: {{ ($min - $gridStart) * $pxPerMin }}px; pointer-events:none"></div>
                                         @endfor
 
                                         {{-- Appointment blocks --}}
@@ -313,7 +375,8 @@
                                             <a href="{{ route('appointments.edit', $appt) }}"
                                                title="{{ $appt->patient?->first_name }} {{ $appt->patient?->surname }} — {{ \Carbon\Carbon::parse($appt->start_time)->format('H:i') }}"
                                                class="block rounded px-1 overflow-hidden hover:opacity-80"
-                                               style="{{ $blockStyle }}">
+                                               style="{{ $blockStyle }}"
+                                               @click.stop>
                                                 <p class="text-xs font-bold leading-tight truncate" style="margin-top:2px">
                                                     {{ \Carbon\Carbon::parse($appt->start_time)->format('H:i') }}–{{ $endTime }}
                                                 </p>
@@ -329,16 +392,79 @@
                                 @endforeach
                             @else
                                 {{-- Day view: single wide column --}}
-                                <div class="flex-1 relative" style="height: {{ $totalHeight }}px">
+                                @php
+                                    $dayApptsJson = $appointments
+                                        ->filter(fn($a) => !$a->cancelled_at)
+                                        ->map(function($a) {
+                                            $parts = explode(':', (string)$a->start_time);
+                                            $s = (int)$parts[0] * 60 + (int)$parts[1];
+                                            return ['s' => $s, 'e' => $s + $a->length_minutes];
+                                        })->values()->toJson();
+                                @endphp
+                                <div class="flex-1 relative"
+                                     style="height: {{ $totalHeight }}px; cursor: crosshair"
+                                     data-appts="{{ $dayApptsJson }}"
+                                     data-date="{{ $anchorDate->toDateString() }}"
+                                     x-data="{
+                                         pxPerMin: {{ $pxPerMin }},
+                                         gridStart: {{ $gridStart }},
+                                         gridEnd:   {{ $gridEnd }},
+                                         snapMin:   5,
+                                         hoverTop:  -1,
+                                         hoverFree: true,
+                                         appts: [],
+                                         date: '',
+                                         init() {
+                                             this.appts = JSON.parse(this.$el.dataset.appts || '[]');
+                                             this.date  = this.$el.dataset.date || '';
+                                         },
+                                         toMins(y) {
+                                             const raw = y / this.pxPerMin + this.gridStart;
+                                             return Math.round(raw / this.snapMin) * this.snapMin;
+                                         },
+                                         isFree(m) {
+                                             const e = m + this.snapMin;
+                                             return !this.appts.some(a => a.s < e && a.e > m);
+                                         },
+                                         onMove(ev) {
+                                             const y = ev.clientY - this.$el.getBoundingClientRect().top;
+                                             const m = this.toMins(y);
+                                             if (m < this.gridStart || m >= this.gridEnd) { this.hoverTop = -1; return; }
+                                             this.hoverTop  = (m - this.gridStart) * this.pxPerMin;
+                                             this.hoverFree = this.isFree(m);
+                                         },
+                                         onLeave() { this.hoverTop = -1; },
+                                         onClick(ev) {
+                                             if (this.hoverTop < 0 || !this.hoverFree) return;
+                                             const y = ev.clientY - this.$el.getBoundingClientRect().top;
+                                             const m = this.toMins(y);
+                                             if (m < this.gridStart || m >= this.gridEnd) return;
+                                             const hh = String(Math.floor(m / 60)).padStart(2, '0');
+                                             const mm = String(m % 60).padStart(2, '0');
+                                             document.getElementById('form-date').value       = this.date;
+                                             document.getElementById('form-start-time').value = hh + ':' + mm;
+                                             const form = document.getElementById('new-appt-form');
+                                             form.classList.remove('hidden');
+                                             form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                         }
+                                     }"
+                                     @mousemove="onMove($event)"
+                                     @mouseleave="onLeave()"
+                                     @click="onClick($event)">
+
+                                    {{-- Hover highlight bar --}}
+                                    <div x-show="hoverTop >= 0"
+                                         :style="'position:absolute; left:0; right:0; pointer-events:none; top:' + hoverTop + 'px; height:' + (snapMin * pxPerMin) + 'px; background:' + (hoverFree ? 'rgba(134,239,172,0.45)' : 'rgba(252,165,165,0.45)')"></div>
+
                                     {{-- Hour grid lines --}}
                                     @for($min = $gridStart; $min <= $gridEnd; $min += 60)
                                         <div class="absolute w-full border-t border-gray-200"
-                                             style="top: {{ ($min - $gridStart) * $pxPerMin }}px"></div>
+                                             style="top: {{ ($min - $gridStart) * $pxPerMin }}px; pointer-events:none"></div>
                                     @endfor
                                     {{-- Half-hour lines --}}
                                     @for($min = $gridStart + 30; $min < $gridEnd; $min += 60)
                                         <div class="absolute w-full border-t border-gray-100"
-                                             style="top: {{ ($min - $gridStart) * $pxPerMin }}px"></div>
+                                             style="top: {{ ($min - $gridStart) * $pxPerMin }}px; pointer-events:none"></div>
                                     @endfor
 
                                     {{-- Appointment blocks --}}
@@ -355,7 +481,8 @@
                                         @endphp
                                         <a href="{{ route('appointments.edit', $appt) }}"
                                            class="block rounded px-2 overflow-hidden hover:opacity-80"
-                                           style="{{ $blockStyle }}">
+                                           style="{{ $blockStyle }}"
+                                           @click.stop>
                                             <p class="text-xs font-bold leading-tight" style="margin-top:2px">
                                                 {{ \Carbon\Carbon::parse($appt->start_time)->format('H:i') }} – {{ $endTime }}
                                             </p>
@@ -370,7 +497,7 @@
                                             @endif
                                         </a>
                                     @empty
-                                        <p class="absolute inset-0 flex items-center justify-center text-sm text-gray-400">
+                                        <p class="absolute inset-0 flex items-center justify-center text-sm text-gray-400" style="pointer-events:none">
                                             No appointments on this day.
                                         </p>
                                     @endforelse

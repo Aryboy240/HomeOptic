@@ -188,7 +188,21 @@
                                                 @endif
                                             </td>
                                             <td class="px-4 py-2 text-right">
-                                                <a href="{{ route('examinations.show', $exam) }}" class="text-indigo-600 hover:text-indigo-800 text-xs">Open</a>
+                                                <div class="flex items-center justify-end gap-3">
+                                                    <a href="{{ route('examinations.show', $exam) }}" class="text-indigo-600 hover:text-indigo-800 text-xs">Open</a>
+                                                    @if($exam->signed_at)
+                                                        <span class="text-xs text-gray-300 cursor-not-allowed" style="padding-left: 10px;" title="Signed examinations cannot be deleted">Delete</span>
+                                                    @else
+                                                        <form method="POST" action="{{ route('examinations.destroy', $exam) }}">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="text-xs text-red-600 hover:text-red-800" style="padding-left: 10px;" 
+                                                                onclick="return confirm('Are you sure you want to delete this examination? This cannot be undone.')">
+                                                                Delete
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -196,6 +210,81 @@
                             </table>
                         @endif
                     </div>
+                </div>
+            </div>
+
+            {{-- GOS Forms --}}
+            <div class="mt-5 bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div class="px-5 py-3 border-b border-gray-100">
+                    <h3 class="font-medium text-gray-800">GOS Forms</h3>
+                </div>
+                <div class="divide-y divide-gray-100">
+                    @foreach(['GOS1' => 'GOS1 — NHS Sight Test', 'GOS3' => 'GOS3 — NHS Optical Voucher', 'GOS6' => 'GOS6 — Domiciliary Visit'] as $type => $label)
+                        @php $form = $gosforms[$type] ?? null; $eligible = $form?->effectiveEligibility() ?? false; @endphp
+                        <div class="px-5 py-4" x-data="{ open: false }">
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-sm font-medium text-gray-800">{{ $label }}</span>
+                                    @if($eligible)
+                                        <span style="background:#dcfce7; color:#15803d;" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium">Eligible</span>
+                                    @else
+                                        <span style="background:#fee2e2; color:#b91c1c;" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium">Not Eligible</span>
+                                    @endif
+                                    @if($form && $form->admin_override !== null)
+                                        <span class="text-xs text-gray-400 italic">Manually overridden</span>
+                                    @endif
+                                </div>
+                                <button type="button" @click="open = !open"
+                                    class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
+                                    <span x-show="!open">Override &darr;</span>
+                                    <span x-show="open" x-cloak>Close &uarr;</span>
+                                </button>
+                            </div>
+
+                            @if($form && $form->override_note)
+                                <p class="mt-1 text-xs text-gray-500 italic">Note: {{ $form->override_note }}</p>
+                            @endif
+
+                            <div x-show="open" x-cloak class="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200">
+                                <p class="text-xs text-gray-500 mb-2">Override auto-calculated eligibility for this patient.</p>
+                                <div class="flex flex-wrap gap-2 items-end">
+                                    <form method="POST" action="{{ route('patients.gos.update', [$patient, $type]) }}" class="flex flex-wrap gap-2 items-end">
+                                        @csrf
+                                        <input type="hidden" name="admin_override" value="1">
+                                        <div>
+                                            <label class="text-xs text-gray-500 block mb-1">Override note (optional)</label>
+                                            <input type="text" name="override_note" value="{{ $form?->override_note }}"
+                                                placeholder="Reason for override"
+                                                class="text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 w-56">
+                                        </div>
+                                        <button type="submit"
+                                            style="background:#15803d; color:#fff;"
+                                            class="px-3 py-1.5 text-xs font-medium rounded-md hover:opacity-90">
+                                            Mark Eligible
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ route('patients.gos.update', [$patient, $type]) }}">
+                                        @csrf
+                                        <input type="hidden" name="admin_override" value="0">
+                                        <button type="submit"
+                                            style="background:#b91c1c; color:#fff;"
+                                            class="px-3 py-1.5 text-xs font-medium rounded-md hover:opacity-90">
+                                            Mark Not Eligible
+                                        </button>
+                                    </form>
+                                    @if($form && $form->admin_override !== null)
+                                        <form method="POST" action="{{ route('patients.gos.clear', [$patient, $type]) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 border border-gray-300 rounded-md bg-white">
+                                                Clear Override
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
 
