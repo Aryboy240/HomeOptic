@@ -240,6 +240,16 @@ class PatientController extends Controller
 
         $this->patients->update($patient, $validated);
 
+        $gos = app(GosEligibilityService::class);
+        foreach (['GOS1' => $gos->isEligibleGos1($patient),
+                  'GOS3' => $gos->isEligibleGos3($patient),
+                  'GOS6' => $gos->isEligibleGos6($patient)] as $formType => $eligible) {
+            PatientGosForm::updateOrCreate(
+                ['patient_id' => $patient->id, 'form_type' => $formType],
+                ['is_eligible' => $eligible]
+            );
+        }
+
         return redirect()->route('patients.show', $patient)
             ->with('success', 'Patient updated successfully.');
     }

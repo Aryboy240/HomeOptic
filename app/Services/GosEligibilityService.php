@@ -13,12 +13,17 @@ class GosEligibilityService
         'esa',
         'pension_credit',
         'universal_credit',
-        'hc2_certificate',
         'nhs_tax_credit_exemption',
+        'hc2_certificate',
+        'hc3_certificate',
     ];
 
     /**
      * GOS1 — routine NHS sight test.
+     *
+     * patient_type is NOT used as a primary eligibility criterion (a Private patient
+     * can still qualify via age, medical condition, or benefits). The only type-based
+     * criterion is FamilyHistory of glaucoma, which requires age >= 40.
      */
     public function isEligibleGos1(Patient $patient): bool
     {
@@ -28,6 +33,10 @@ class GosEligibilityService
             return true;
         }
 
+        if ($patient->in_full_time_education && $age < 19) {
+            return true;
+        }
+
         if ($patient->has_glaucoma || $patient->is_diabetic) {
             return true;
         }
@@ -36,28 +45,19 @@ class GosEligibilityService
             return true;
         }
 
-        if ($patient->in_full_time_education && $age < 19) {
+        if ($patient->patient_type === PatientType::FamilyHistory && $age >= 40) {
             return true;
         }
 
-        if ($this->hasEligibleBenefit($patient)) {
-            return true;
-        }
-
-        $eligibleTypes = [
-            PatientType::Over60,
-            PatientType::NHS,
-            PatientType::Child,
-            PatientType::Glaucoma,
-            PatientType::FamilyHistory,
-        ];
-
-        return in_array($patient->patient_type, $eligibleTypes, strict: true);
+        return $this->hasEligibleBenefit($patient);
     }
 
     /**
      * GOS3 — NHS optical voucher.
-     * Same criteria as GOS1, with Child patient type as under-19 proxy.
+     *
+     * Age >= 60 is NOT a standalone criterion for GOS3 — it qualifies a patient for
+     * a free sight test (GOS1) only. A voucher requires a specific medical or
+     * financial criterion. Sensory disabilities (blind/hearing/RP) are GOS1-only.
      */
     public function isEligibleGos3(Patient $patient): bool
     {
@@ -67,8 +67,7 @@ class GosEligibilityService
             return true;
         }
 
-        // Child patient type used as proxy for age < 19
-        if ($patient->patient_type === PatientType::Child) {
+        if ($patient->in_full_time_education && $age < 19) {
             return true;
         }
 
@@ -76,26 +75,11 @@ class GosEligibilityService
             return true;
         }
 
-        if ($patient->is_blind_partially_sighted || $patient->has_hearing_impairment || $patient->has_retinitis_pigmentosa) {
+        if ($patient->patient_type === PatientType::FamilyHistory && $age >= 40) {
             return true;
         }
 
-        if ($patient->in_full_time_education && $age < 19) {
-            return true;
-        }
-
-        if ($this->hasEligibleBenefit($patient)) {
-            return true;
-        }
-
-        $eligibleTypes = [
-            PatientType::Over60,
-            PatientType::NHS,
-            PatientType::Glaucoma,
-            PatientType::FamilyHistory,
-        ];
-
-        return in_array($patient->patient_type, $eligibleTypes, strict: true);
+        return $this->hasEligibleBenefit($patient);
     }
 
     /**

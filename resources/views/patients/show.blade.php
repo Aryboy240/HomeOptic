@@ -234,11 +234,18 @@
                                         <span class="text-xs text-gray-400 italic">Manually overridden</span>
                                     @endif
                                 </div>
-                                <button type="button" @click="open = !open"
-                                    class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
-                                    <span x-show="!open">Override &darr;</span>
-                                    <span x-show="open" x-cloak>Close &uarr;</span>
-                                </button>
+                                <div class="flex items-center gap-3">
+                                    @if($eligible)
+                                        <a href="{{ route('patients.gos.form', [$patient, $type]) }}" target="_blank"
+                                           class="text-xs font-medium px-2 py-1 rounded text-white"
+                                           style="background:#003087;">Fill Form</a>
+                                    @endif
+                                    <button type="button" @click="open = !open"
+                                        class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
+                                        <span x-show="!open">Override &darr;</span>
+                                        <span x-show="open" x-cloak>Close &uarr;</span>
+                                    </button>
+                                </div>
                             </div>
 
                             @if($form && $form->override_note)

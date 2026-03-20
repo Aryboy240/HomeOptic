@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
 
     // ── GOS Forms ────────────────────────────────────────────────────────────
+    Route::get('/patients/{patient}/gos/{formType}/form', [PatientGosFormController::class, 'showForm'])->name('patients.gos.form');
     Route::post('/patients/{patient}/gos/{formType}', [PatientGosFormController::class, 'update'])->name('patients.gos.update');
     Route::delete('/patients/{patient}/gos/{formType}/override', [PatientGosFormController::class, 'clearOverride'])->name('patients.gos.clear');
 
