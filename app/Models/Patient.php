@@ -69,6 +69,11 @@ class Patient extends Model
         return $this->hasMany(PatientGosForm::class);
     }
 
+    public function gosSubmissions(): HasMany
+    {
+        return $this->hasMany(GosSubmission::class);
+    }
+
     // -------------------------------------------------------------------------
     // Scopes
     // -------------------------------------------------------------------------

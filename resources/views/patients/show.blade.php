@@ -253,7 +253,7 @@
                                 </div>
                                 <div class="flex items-center gap-3">
                                     @if($eligible)
-                                        <a href="{{ route('patients.gos.form', [$patient, $type]) }}" target="_blank"
+                                        <a href="{{ route('patients.gos.form', [$patient, $type]) }}"
                                            class="text-xs font-medium px-2 py-1 rounded text-white"
                                            style="background:#003087;">Fill Form</a>
                                     @endif

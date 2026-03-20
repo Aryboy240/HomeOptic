@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\DiaryController;
+use App\Http\Controllers\EgosController;
 use App\Http\Controllers\ExaminationController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PatientGosFormController;
@@ -40,6 +41,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
     Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
     Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
+
+    // ── eGOS Claims ──────────────────────────────────────────────────────────
+    Route::get('/egos', [EgosController::class, 'index'])->name('egos.index');
+    Route::post('/egos', [EgosController::class, 'store'])->name('egos.store');
+    Route::post('/egos/batch-submit', [EgosController::class, 'batchSubmit'])->name('egos.batch-submit');
+    Route::post('/egos/batch-paid', [EgosController::class, 'batchMarkPaid'])->name('egos.batch-paid');
+    Route::patch('/egos/{submission}/status', [EgosController::class, 'updateStatus'])->name('egos.status');
+    Route::delete('/egos/{submission}', [EgosController::class, 'destroy'])->name('egos.destroy');
 
     // ── GOS Forms ────────────────────────────────────────────────────────────
     Route::get('/patients/{patient}/gos/{formType}/form', [PatientGosFormController::class, 'showForm'])->name('patients.gos.form');

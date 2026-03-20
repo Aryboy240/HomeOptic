@@ -55,6 +55,7 @@ html { background: #e8e8e8; }
 body { font-family: Arial, Helvetica, sans-serif; font-size: 9pt; color: #000; background: #e8e8e8; }
 .page { max-width: 190mm; margin: 8mm auto; background: #fff; padding: 8mm 10mm; box-shadow: 0 2px 10px rgba(0,0,0,.25); }
 .print-btn { position: fixed; top: 10px; right: 10px; background: #003087; color: #fff; border: none; padding: 7px 18px; font-size: 11pt; border-radius: 4px; cursor: pointer; z-index: 9999; }
+.back-btn  { position: fixed; top: 10px; left: 10px; background: #003087; color: #fff; text-decoration: none; padding: 7px 18px; font-size: 11pt; border-radius: 4px; z-index: 9999; }
 /* GOS3 header — amber/gold */
 .form-hdr { display: flex; justify-content: space-between; align-items: flex-start; background: #ffb81c; padding: 6px 10px; margin-bottom: 6px; }
 .form-hdr-title h1 { font-size: 12pt; font-weight: 900; color: #000; }
@@ -90,11 +91,62 @@ th { background: #e0e0e0; text-align: center; font-weight: bold; }
     .page { margin: 0; padding: 6mm 8mm; max-width: none; box-shadow: none; }
     .pb-visual { border-top: none; margin-top: 0; padding-top: 0; }
 }
+.save-btn { position: fixed; top: 10px; right: 100px; background: #16a34a; color: #fff; border: none; padding: 7px 18px; font-size: 11pt; border-radius: 4px; cursor: pointer; z-index: 9999; }
+.save-btn:disabled { background: #6b7280; cursor: default; }
 </style>
 </head>
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <body>
 
+<button onclick="history.back()" class="back-btn no-print">&larr; {{ $source === 'egos' ? 'Back to eGOS' : 'Back to Patient' }}</button>
 <button class="print-btn no-print" onclick="window.print()">&#128438; Print</button>
+<button id="save-btn" class="save-btn no-print" onclick="saveEgosForm()">&#128190; {{ $existingSubmission ? 'Update Form' : 'Save Form' }}</button>
+<div id="save-msg" class="no-print" style="display:none; position:fixed; top:48px; right:100px; background:#dcfce7; color:#166534; border:1px solid #86efac; padding:5px 12px; border-radius:4px; font-size:9pt; z-index:9999;">
+    Form saved to eGOS submissions
+</div>
+
+<script>
+function saveEgosForm() {
+    const fields = [];
+    document.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(function(el, i) {
+        var entry = { index: i, type: el.type || 'text', name: el.name || null, value: el.value };
+        if (el.type === 'checkbox' || el.type === 'radio') { entry.checked = el.checked; }
+        fields.push(entry);
+    });
+    fetch('{{ route('egos.store') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({ patient_id: {{ $patient->id }}, form_type: 'GOS3', form_data: fields, voucher_value: {{ $existingSubmission?->voucher_value ?? 'null' }} })
+    }).then(function(r) {
+        if (r.ok) {
+            document.getElementById('save-btn').disabled = true;
+            document.getElementById('save-btn').textContent = '✓ Saved';
+            document.getElementById('save-msg').style.display = 'block';
+        }
+    }).catch(function() { alert('Save failed. Please try again.'); });
+}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const saved = @json($savedFormData ?? []);
+    if (!saved.length) return;
+    const inputs = document.querySelectorAll('input:not([type=hidden]), select, textarea');
+    saved.forEach(function(entry) {
+        const el = inputs[entry.index];
+        if (!el) return;
+        if (entry.type === 'checkbox' || entry.type === 'radio') {
+            el.checked = entry.checked ?? false;
+        } else {
+            el.value = entry.value ?? '';
+        }
+    });
+});
+</script>
 
 <div class="page">
 

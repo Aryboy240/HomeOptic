@@ -18,6 +18,9 @@
                     <x-nav-link :href="route('patients.index')" :active="request()->routeIs('patients.*') || request()->routeIs('examinations.*')">
                         {{ __('Patients') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('egos.index')" :active="request()->routeIs('egos.*')">
+                        {{ __('eGOS') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -75,6 +78,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('patients.index')" :active="request()->routeIs('patients.*') || request()->routeIs('examinations.*')">
                 {{ __('Patients') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('egos.index')" :active="request()->routeIs('egos.*')">
+                {{ __('eGOS') }}
             </x-responsive-nav-link>
         </div>
 
