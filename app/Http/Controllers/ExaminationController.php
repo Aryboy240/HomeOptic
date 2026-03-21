@@ -13,7 +13,9 @@ use App\Models\Examination;
 use App\Models\Patient;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExaminationController extends Controller
 {
@@ -82,8 +84,9 @@ class ExaminationController extends Controller
         ]);
 
         $examination->historySymptoms->update($validated);
+        $examination->update(['last_edited_by' => $request->user()->id, 'last_edited_at' => now()]);
 
-        return redirect()->route('examinations.show', $examination)
+        return redirect(route('examinations.show', $examination) . '#tab-history')
             ->with('success', 'History & Symptoms saved.');
     }
 
@@ -123,8 +126,9 @@ class ExaminationController extends Controller
         ]);
 
         $examination->ophthalmoscopy->update($validated);
+        $examination->update(['last_edited_by' => $request->user()->id, 'last_edited_at' => now()]);
 
-        return redirect()->route('examinations.show', $examination)
+        return redirect(route('examinations.show', $examination) . '#tab-ophthalmoscopy')
             ->with('success', 'Ophthalmoscopy saved.');
     }
 
@@ -140,8 +144,12 @@ class ExaminationController extends Controller
             'drops_more_info'            => ['nullable', 'string'],
             'pre_iop_r'                  => ['nullable', 'string', 'max:20'],
             'pre_iop_l'                  => ['nullable', 'string', 'max:20'],
+            'pre_iop_time'               => ['nullable', 'string', 'max:8'],
+            'pre_iop_method'             => ['nullable', 'string', 'in:gat,icare,nct,perkins,tono_pen'],
             'post_iop_r'                 => ['nullable', 'string', 'max:20'],
             'post_iop_l'                 => ['nullable', 'string', 'max:20'],
+            'post_iop_time'              => ['nullable', 'string', 'max:8'],
+            'post_iop_method'            => ['nullable', 'string', 'in:gat,icare,nct,perkins,tono_pen'],
             'ct_with_rx'                 => ['nullable', 'string', 'max:255'],
             'ct_with_rx_near'            => ['nullable', 'string', 'max:255'],
             'ct_with_rx_near_notes'      => ['nullable', 'string'],
@@ -164,12 +172,14 @@ class ExaminationController extends Controller
             'npc'                        => ['nullable', 'string', 'max:255'],
             'stereopsis'                 => ['nullable', 'string', 'max:255'],
             'colour_vision'              => ['nullable', 'string', 'max:255'],
+            'colour_vision_notes'        => ['nullable', 'string'],
             'amplitude_of_accommodation' => ['nullable', 'string', 'max:255'],
         ]);
 
         $examination->investigative->update($validated);
+        $examination->update(['last_edited_by' => $request->user()->id, 'last_edited_at' => now()]);
 
-        return redirect()->route('examinations.show', $examination)
+        return redirect(route('examinations.show', $examination) . '#tab-investigative')
             ->with('success', 'Investigative Techniques saved.');
     }
 
@@ -274,17 +284,48 @@ class ExaminationController extends Controller
             'rec_tint'              => ['boolean'],
             'rec_mar'               => ['boolean'],
             // NHS & retest
-            'nhs_voucher_dist'      => ['nullable', 'string', 'max:255'],
-            'nhs_voucher_near'      => ['nullable', 'string', 'max:255'],
+            'nhs_voucher_dist'      => ['nullable', 'string', 'in:A,B,C,D'],
+            'nhs_voucher_near'      => ['nullable', 'string', 'in:A,B,C,D'],
+            'nhs_voucher_bifocal'   => ['nullable', 'string', 'in:E,F,G,H'],
             'examination_comment'   => ['nullable', 'string'],
             'retest_after'          => ['nullable', 'string', 'max:50'],
             'retest_patient_type'   => ['nullable', 'string', 'max:1'],
         ]);
 
         $examination->refraction->update($validated);
+        $examination->update(['last_edited_by' => $request->user()->id, 'last_edited_at' => now()]);
 
-        return redirect()->route('examinations.show', $examination)
+        return redirect(route('examinations.show', $examination) . '#tab-refraction')
             ->with('success', 'Refraction saved.');
+    }
+
+    /**
+     * Download the generated PDF report for a signed examination.
+     */
+    public function report(Examination $examination): StreamedResponse
+    {
+        abort_if(is_null($examination->report_path), 404, 'Report not yet generated.');
+        abort_unless(Storage::disk('local')->exists($examination->report_path), 404, 'Report file not found.');
+
+        $filename = 'examination-' . $examination->id . '-' . $examination->patient->surname . '.pdf';
+
+        return Storage::disk('local')->download($examination->report_path, $filename, [
+            'Content-Type' => 'application/pdf',
+        ]);
+    }
+
+    /**
+     * Delete an unsigned examination and its child tab records (cascade handles children).
+     */
+    public function destroy(Examination $examination): RedirectResponse
+    {
+        abort_unless(is_null($examination->signed_at), 403, 'Signed examinations cannot be deleted.');
+
+        $patient = $examination->patient;
+        $examination->delete();
+
+        return redirect()->route('patients.show', $patient)
+            ->with('success', 'Examination deleted.');
     }
 
     /**
@@ -293,8 +334,10 @@ class ExaminationController extends Controller
     public function sign(Request $request, Examination $examination): RedirectResponse
     {
         $examination->update([
-            'signed_by' => $request->user()->id,
-            'signed_at' => now(),
+            'signed_by'      => $request->user()->id,
+            'signed_at'      => now(),
+            'last_edited_by' => $request->user()->id,
+            'last_edited_at' => now(),
         ]);
 
         return redirect()->route('examinations.show', $examination)

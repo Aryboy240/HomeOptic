@@ -2,16 +2,25 @@
 
 namespace App\Jobs;
 
-use App\Mail\AppointmentReminderMail;
+use App\Factories\NotificationStrategyFactory;
 use App\Models\Appointment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
+/**
+ * Sends an appointment reminder notification via the appropriate channel.
+ *
+ * Strategy selection (via NotificationStrategyFactory):
+ *   - EmailNotificationStrategy  — used when the patient has an email address.
+ *   - SmsNotificationStrategy    — used when the patient has a mobile number but no email (stub).
+ *   - LetterNotificationStrategy — fallback when neither contact method is available (stub).
+ *
+ * The factory encapsulates the selection logic so the job remains agnostic
+ * of which channel is used. Swap or extend strategies without touching this class.
+ */
 class SendAppointmentReminderJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -25,17 +34,8 @@ class SendAppointmentReminderJob implements ShouldQueue
         // Re-load relations — SerializesModels restores the bare model without eager loads.
         $appointment = $this->appointment->load(['patient', 'diary']);
 
-        if (empty($appointment->patient->email)) {
-            Log::info('Appointment reminder skipped: patient has no email address on record.', [
-                'appointment_id' => $appointment->id,
-                'patient_id'     => $appointment->patient_id,
-            ]);
-
-            return;
-        }
-
-        Mail::to($appointment->patient->email)
-            ->send(new AppointmentReminderMail($appointment));
+        $strategy = NotificationStrategyFactory::for($appointment->patient);
+        $strategy->send($appointment);
 
         // Record when the notification was last sent, used by the diary "Update & Notify" flow.
         $appointment->update(['notified_at' => now()]);

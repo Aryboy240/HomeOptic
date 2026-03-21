@@ -40,10 +40,63 @@ class ExaminationFactory
                 'staff_id'    => $staff->id,
             ]);
 
-            // Four blank child rows — one per tab. Content is populated via form.
-            ExamHistorySymptom::create(['examination_id' => $examination->id]);
+            // ── Carry-forward from previous signed exam ───────────────────────────
+            // If the patient has a prior signed exam of the same type, seed certain
+            // stable fields into the new blank tabs so clinicians do not have to
+            // re-enter standing information on every visit.  We deliberately exclude:
+            //   • reason_for_visit / last_exam fields — always clinically fresh
+            //   • other_notes — context-specific to the previous visit
+            //   • all ophthalmoscopy findings — must be observed anew each time
+            //   • all refraction/Rx data — prescription changes visit-to-visit
+            //   • signature fields — must never be pre-populated
+            $prev = $patient
+                ->examinations()
+                ->where('exam_type', $type)
+                ->whereNotNull('signed_at')
+                ->orderByDesc('signed_at')
+                ->with(['historySymptoms', 'investigative'])
+                ->first();
+
+            // History & Symptoms: carry forward standing medical/social history and
+            // GOS eligibility context — things unlikely to change between visits.
+            $historyData = ['examination_id' => $examination->id];
+            if ($prev?->historySymptoms) {
+                $hs = $prev->historySymptoms;
+                $historyData += array_filter([
+                    'gos_eligibility'        => $hs->gos_eligibility,
+                    'gos_establishment_name' => $hs->gos_establishment_name,
+                    'gos_establishment_town' => $hs->gos_establishment_town,
+                    'medication_notes'       => $hs->medication_notes,
+                    'medications'            => $hs->medications,
+                    'has_glaucoma'           => $hs->has_glaucoma,
+                    'has_fhg'                => $hs->has_fhg,
+                    'is_diabetic'            => $hs->is_diabetic,
+                    'poh'                    => $hs->poh,
+                    'gh'                     => $hs->gh,
+                    'fh'                     => $hs->fh,
+                    'foh'                    => $hs->foh,
+                ], fn ($v) => $v !== null && $v !== '' && $v !== []);
+            }
+
+            // Investigative: carry forward preferred tonometry method and colour
+            // vision result — stable equipment/patient characteristics.
+            $investigativeData = ['examination_id' => $examination->id];
+            if ($prev?->investigative) {
+                $inv = $prev->investigative;
+                $investigativeData += array_filter([
+                    'pre_iop_method'  => $inv->pre_iop_method?->value,
+                    'post_iop_method' => $inv->post_iop_method?->value,
+                    'colour_vision'   => $inv->colour_vision,
+                ], fn ($v) => $v !== null && $v !== '');
+            }
+            // ─────────────────────────────────────────────────────────────────────
+
+            // Four child rows — one per tab. Content is populated via form.
+            // History and Investigative rows are pre-seeded from the carry-forward
+            // data above (falls back to bare ['examination_id'] when no prior exam).
+            ExamHistorySymptom::create($historyData);
             ExamOphthalmoscopy::create(['examination_id' => $examination->id]);
-            ExamInvestigative::create(['examination_id'  => $examination->id]);
+            ExamInvestigative::create($investigativeData);
             ExamRefraction::create(['examination_id'     => $examination->id]);
 
             // Return the parent with all tabs loaded so the caller has a

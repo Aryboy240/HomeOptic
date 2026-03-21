@@ -3,3 +3,72 @@
 @tailwind utilities;
 
 [x-cloak] { display: none !important; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Dark mode — layered palette
+   ───────────────────────────────────────────────────────────────────
+   Page bg:      #0f1117   Nav / header:  #1a1d27   Cards:    #1e2130
+   Input bg:     #252836   Borders:       #2e3347   In-bord:  #3a3f54
+   Text primary: #e8eaf0   Text secondary:#8b92a8   Today:    #2a2d4a
+   ═══════════════════════════════════════════════════════════════════ */
+
+html.dark { color-scheme: dark; }
+
+/* ── 1. Page background ────────────────────────────────────────────── */
+html.dark body,
+html.dark .min-h-screen            { background-color: #0f1117 !important; }
+
+/* ── 2. Navigation bar ─────────────────────────────────────────────── */
+html.dark nav                      { background-color: #1a1d27 !important;
+                                     border-bottom-color: #2e3347 !important; }
+
+/* ── 3. Page header (slot) ─────────────────────────────────────────── */
+html.dark header                   { background-color: #1a1d27 !important;
+                                     box-shadow: 0 1px 0 #2e3347 !important; }
+
+/* ── 4. Cards / white panels ───────────────────────────────────────── */
+html.dark .bg-white                { background-color: #1e2130 !important; }
+
+/* ── 5. Tinted backgrounds (table headers, override panels, etc.) ──── */
+html.dark .bg-gray-50              { background-color: #252836 !important; }
+html.dark .bg-gray-100             { background-color: #1a1d27 !important; }
+
+/* ── 6. Today / active calendar highlight ──────────────────────────── */
+html.dark .bg-indigo-50            { background-color: #2a2d4a !important; }
+
+/* ── 7. Row hover ──────────────────────────────────────────────────── */
+html.dark .hover\:bg-gray-50:hover { background-color: #252836 !important; }
+
+/* ── 8. Borders ────────────────────────────────────────────────────── */
+html.dark .border-gray-100,
+html.dark .border-gray-200         { border-color: #2e3347 !important; }
+
+html.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden])
+                                   { border-color: #2e3347 !important; }
+
+/* ── 9. Text hierarchy ─────────────────────────────────────────────── */
+html.dark .text-gray-900,
+html.dark .text-gray-800           { color: #e8eaf0 !important; }
+html.dark .text-gray-700           { color: #c5c9d6 !important; }
+html.dark .text-gray-600           { color: #8b92a8 !important; }
+html.dark .text-gray-500           { color: #8b92a8 !important; }
+html.dark .text-gray-400           { color: #5e657a !important; }
+html.dark .text-gray-300           { color: #4a5068 !important; }
+
+/* ── 10. Form inputs ───────────────────────────────────────────────── */
+html.dark input:not([type=submit]):not([type=button]):not([type=checkbox]):not([type=radio]):not([type=file]),
+html.dark select,
+html.dark textarea {
+    background-color: #252836 !important;
+    border-color:     #3a3f54 !important;
+    color:            #e8eaf0 !important;
+}
+
+/* ── 11. Appointment status blocks (override PHP inline styles) ─────── */
+html.dark [data-status='booked']         { background: #1a3a2a !important; border-left-color: #22c55e !important; color: #86efac !important; }
+html.dark [data-status='confirmed']      { background: #1a2a3a !important; border-left-color: #3b82f6 !important; color: #93c5fd !important; }
+html.dark [data-status='completed']      { background: #2a1a3a !important; border-left-color: #a855f7 !important; color: #d8b4fe !important; }
+html.dark [data-status='did_not_attend'] { background: #3a1a1a !important; border-left-color: #ef4444 !important; color: #fca5a5 !important; }
+html.dark [data-status='cancelled']      { background: #252836 !important; border-left-color: #6b7280 !important; color: #6b7280 !important; }
+html.dark [data-status='default']        { background: #1a1e42 !important; border-left-color: #6366f1 !important; color: #a5b4fc !important; }

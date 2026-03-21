@@ -6,7 +6,7 @@ A domiciliary optician management system built for **Psk Locum Cover Ltd** — a
 
 ## The Brief
 
-My dad is a qualified optician who is looking to start his own domiciliary service — visiting patients at home, typically elderly people who can't travel to a practice. To understand the domain properly before building anything, I researched Blink OMS, a real commercial optician management platform used by an existing practice. I used Blink as the reference for this prototype, basing the data model and workflows on a proven real-world system rather than guessing at requirements.
+Father dearest is a qualified optician who is looking to start his own domiciliary service — visiting patients at home, typically elderly people who can't travel to a practice. To understand the domain properly before building anything, I researched Blink OMS, a real commercial optician management platform used by an existing practice. I used Blink as the reference for this prototype, basing the data model and workflows on a proven real-world system rather than guessing at requirements.
 
 The three core pillars of the prototype:
 - **Patient database** — storing personal, contact, and clinical information

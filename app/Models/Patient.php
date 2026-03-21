@@ -25,9 +25,14 @@ class Patient extends Model
         'dropped_reason'     => DroppedReason::class,
         'how_heard'          => HowHeard::class,
         'domiciliary_reason' => DomiciliaryReason::class,
-        'has_glaucoma'       => 'boolean',
-        'is_diabetic'        => 'boolean',
-        'is_nhs'             => 'boolean',
+        'has_glaucoma'               => 'boolean',
+        'is_diabetic'                => 'boolean',
+        'is_nhs'                     => 'boolean',
+        'is_blind_partially_sighted' => 'boolean',
+        'has_hearing_impairment'     => 'boolean',
+        'has_retinitis_pigmentosa'   => 'boolean',
+        'in_full_time_education'     => 'boolean',
+        'benefits'                   => 'array',
     ];
 
     // -------------------------------------------------------------------------
@@ -57,6 +62,21 @@ class Patient extends Model
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class);
+    }
+
+    public function gosforms(): HasMany
+    {
+        return $this->hasMany(PatientGosForm::class);
+    }
+
+    public function gosSubmissions(): HasMany
+    {
+        return $this->hasMany(GosSubmission::class);
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(PatientDocument::class);
     }
 
     // -------------------------------------------------------------------------
