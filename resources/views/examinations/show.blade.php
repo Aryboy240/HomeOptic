@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
+        <div class="flex flex-wrap gap-y-2 items-center justify-between">
+            <div class="flex items-center gap-3 flex-wrap">
                 <a href="{{ route('patients.show', $examination->patient) }}" class="text-gray-400 hover:text-gray-600">&larr;</a>
                 <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">
                     Examination — {{ $examination->patient->first_name }} {{ $examination->patient->surname }}
@@ -45,8 +45,8 @@
             @endif
 
             {{-- Tab bar --}}
-            <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
-                <nav class="-mb-px flex space-x-6">
+            <div class="border-b border-gray-200 dark:border-gray-700 mb-6 overflow-x-auto">
+                <nav class="-mb-px flex space-x-6 min-w-max">
                     @foreach([
                         'history'       => 'History & Symptoms',
                         'ophthalmoscopy'=> 'Ophthalmoscopy',
@@ -73,7 +73,7 @@
 
                     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-5 mb-4">
                         <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">GOS Eligibility</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                             <div>
                                 <x-input-label for="gos_eligibility" value="GOS Eligibility *" />
                                 <select id="gos_eligibility" name="gos_eligibility" required
@@ -255,7 +255,7 @@
                                 'XALATAN'                  => 'xalatan',
                             ];
                         @endphp
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1.5 mt-1">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1.5 mt-1">
                             @foreach($medList as $label => $value)
                                 <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                                     <input type="checkbox" name="medications[]" value="{{ $value }}"
@@ -267,8 +267,8 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-end">
-                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700">
+                    <div class="flex justify-end mt-2">
+                        <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700">
                             Save History &amp; Symptoms
                         </button>
                     </div>
@@ -344,7 +344,7 @@
                                 Set Default (R)
                             </button>
                         </div>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                             @foreach($ophFields as $field => $cfg)
                                 @php $name = "right_{$field}"; $saved = old($name, $oph?->$name); @endphp
                                 <div>
@@ -377,7 +377,7 @@
                                 Set Default (L)
                             </button>
                         </div>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                             @foreach($ophFields as $field => $cfg)
                                 @php $name = "left_{$field}"; $saved = old($name, $oph?->$name); @endphp
                                 <div>
@@ -394,8 +394,8 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-end">
-                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700">
+                    <div class="flex justify-end mt-2">
+                        <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700">
                             Save Ophthalmoscopy
                         </button>
                     </div>
@@ -411,7 +411,7 @@
 
                     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-5 mb-4">
                         <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Drops</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                             <div class="flex items-center gap-2 pt-5">
                                 <input type="hidden" name="drops_used" value="0">
                                 <input type="checkbox" id="drops_used" name="drops_used" value="1" @checked(old('drops_used', $inv?->drops_used))
@@ -486,7 +486,7 @@
 
                         {{-- Post IOP --}}
                         <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Post IOP</h4>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                             <div>
                                 <x-input-label for="post_iop_method" value="Method" />
                                 <select id="post_iop_method" name="post_iop_method"
@@ -550,7 +550,7 @@
 
                     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-5 mb-4">
                         <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Cover Test</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                             @foreach([
                                 'ct_with_rx'      => 'CT With Rx (Distance)',
                                 'ct_with_rx_near' => 'CT With Rx (Near)',
@@ -576,7 +576,7 @@
                         {{-- OMB --}}
                         <div class="mb-4">
                             <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">OMB</p>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                                 @foreach(['omb_h' => 'OMB H', 'omb_v' => 'OMB V', 'omb_near_h' => 'OMB Near H', 'omb_near_v' => 'OMB Near V'] as $field => $label)
                                     <div>
                                         <x-input-label :for="$field" :value="$label" />
@@ -594,7 +594,7 @@
                         {{-- Keratometry --}}
                         <div class="mb-4">
                             <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Keratometry</p>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                                 @foreach(['keratometry_r' => 'Keratometry R', 'keratometry_l' => 'Keratometry L'] as $field => $label)
                                     <div>
                                         <x-input-label :for="$field" :value="$label" />
@@ -608,7 +608,7 @@
                         {{-- Visual Fields --}}
                         <div class="mb-4">
                             <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Visual Fields</p>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                                 @foreach(['visual_fields_r' => 'Visual Fields R', 'visual_fields_l' => 'Visual Fields L'] as $field => $label)
                                     <div>
                                         <x-input-label :for="$field" :value="$label" />
@@ -625,7 +625,7 @@
 
                         {{-- NPC, Motility, Stereopsis --}}
                         <div class="mb-4">
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                                 <div>
                                     <x-input-label for="npc" value="NPC" />
                                     <x-text-input id="npc" name="npc" type="text" class="mt-1 block w-full"
@@ -651,7 +651,7 @@
                         {{-- Amsler --}}
                         <div class="mb-4">
                             <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Amsler</p>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                                 <div>
                                     <x-input-label for="amsler_r" value="Amsler R" />
                                     <select id="amsler_r" name="amsler_r"
@@ -686,7 +686,7 @@
                         {{-- Colour Vision --}}
                         <div class="mb-4">
                             <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Colour Vision</p>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                                 <div>
                                     <x-input-label for="colour_vision" value="Result" />
                                     <select id="colour_vision" name="colour_vision"
@@ -712,8 +712,8 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-end">
-                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700">
+                    <div class="flex justify-end mt-2">
+                        <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700">
                             Save Investigative Techniques
                         </button>
                     </div>
@@ -1051,7 +1051,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                             @foreach([
                                 'rec_distance'     => 'Distance',
                                 'rec_near'         => 'Near',
@@ -1115,7 +1115,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                             <div>
                                 <x-input-label for="retest_after" value="Retest After" />
                                 <x-text-input id="retest_after" name="retest_after" type="text" class="mt-1 block w-full"
@@ -1139,8 +1139,8 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-end">
-                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700">
+                    <div class="flex justify-end mt-2">
+                        <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700">
                             Save Refraction
                         </button>
                     </div>

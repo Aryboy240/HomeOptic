@@ -58,6 +58,11 @@ body { font-family: Arial, Helvetica, sans-serif; font-size: 9pt; color: #000; b
 .page { max-width: 190mm; margin: 8mm auto; background: #fff; padding: 8mm 10mm; box-shadow: 0 2px 10px rgba(0,0,0,.25); }
 .print-btn { position: fixed; top: 10px; right: 10px; background: #003087; color: #fff; border: none; padding: 7px 18px; font-size: 11pt; border-radius: 4px; cursor: pointer; z-index: 9999; }
 .back-btn  { position: fixed; top: 10px; left: 10px; background: #003087; color: #fff; text-decoration: none; padding: 7px 18px; font-size: 11pt; border-radius: 4px; z-index: 9999; }
+@media (max-width: 600px) {
+    .print-btn { top: auto; bottom: 10px; right: 10px; font-size: 9pt; padding: 6px 12px; }
+    .back-btn  { top: auto; bottom: 10px; left: 10px; font-size: 9pt; padding: 6px 12px; }
+    .page { padding: 4mm 4mm; margin: 4mm auto; }
+}
 /* Header */
 .form-hdr { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3pt solid #003087; padding-bottom: 4px; margin-bottom: 8px; }
 .form-hdr-title h1 { font-size: 12pt; font-weight: 900; color: #003087; letter-spacing: 0.5pt; }

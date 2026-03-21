@@ -62,7 +62,7 @@
 
                 @if($status !== 'all' || $dateFrom || $dateTo || $sort !== 'desc')
                     <a href="{{ route('notifications.index') }}"
-                       class="px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+                       class="px-3 py-1.5 text-sm bg-blue-600 rounded-lg text-white text-white-500 dark:text-white-700 transition-colors">
                         Clear
                     </a>
                 @endif

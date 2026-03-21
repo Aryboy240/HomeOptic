@@ -83,7 +83,7 @@
 
                 {{-- Batch action bar --}}
                 <div x-show="selected.length > 0" x-cloak
-                     class="mb-3 p-3 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 rounded-lg flex items-center gap-4">
+                     class="mb-3 p-3 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 rounded-lg flex flex-wrap items-center gap-3">
                     <span class="text-sm font-medium text-indigo-800 dark:text-indigo-300" x-text="selected.length + ' submission(s) selected'"></span>
 
                     <form method="POST" action="{{ route('egos.batch-submit') }}" class="inline"
@@ -108,7 +108,8 @@
                 </div>
 
                 {{-- Results table --}}
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-x-auto">
+                    <div class="min-w-[700px]">
 
                     @php
                         $allIds = $submissions->pluck('id')->toArray();
@@ -224,6 +225,7 @@
                             </div>
                         @endif
                     @endif
+                    </div>{{-- end min-w wrapper --}}
                 </div>
             </div>
 

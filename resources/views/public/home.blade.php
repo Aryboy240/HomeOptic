@@ -36,12 +36,13 @@
     }
     .card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
     .card-hover:hover { transform: translateY(-3px); }
+    [x-cloak] { display: none !important; }
 </style>
 </head>
 <body class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans antialiased">
 
 {{-- ── Navigation ──────────────────────────────────────────────────────────── --}}
-<nav class="sticky top-0 z-50 bg-white/90 dark:bg-gray-950/90 backdrop-blur border-b border-gray-200 dark:border-gray-800">
+<nav x-data="{ open: false }" class="sticky top-0 z-50 bg-white/90 dark:bg-gray-950/90 backdrop-blur border-b border-gray-200 dark:border-gray-800">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             {{-- Logo --}}
@@ -61,7 +62,7 @@
                 <a href="#contact" class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">Contact</a>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 sm:gap-3">
                 {{-- Dark mode toggle --}}
                 <button id="theme-toggle"
                         class="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-gray-500 dark:text-gray-300 transition-colors"
@@ -73,11 +74,31 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
                     </svg>
                 </button>
+                {{-- Book button: hidden on smallest mobile (show in hamburger menu) --}}
                 <a href="{{ route('book') }}"
-                   class="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm">
+                   class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm">
                     Book Appointment
                 </a>
+                {{-- Hamburger (mobile only) --}}
+                <button @click="open = !open" class="md:hidden w-8 h-8 flex items-center justify-center rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                    <svg x-show="!open" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                    <svg x-show="open" x-cloak class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
+        </div>
+    </div>
+    {{-- Mobile menu --}}
+    <div x-show="open" x-cloak class="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95">
+        <div class="max-w-6xl mx-auto px-4 py-3 space-y-1">
+            <a href="#services" @click="open=false" class="block py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-400">Services</a>
+            <a href="#how-it-works" @click="open=false" class="block py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-400">How It Works</a>
+            <a href="#about" @click="open=false" class="block py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-400">About</a>
+            <a href="#contact" @click="open=false" class="block py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-400">Contact</a>
+            <a href="{{ route('book') }}" class="block mt-2 py-2.5 px-4 bg-blue-700 text-white text-sm font-semibold rounded-lg text-center">Book Appointment</a>
         </div>
     </div>
 </nav>
@@ -317,6 +338,7 @@
     </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 <script>
     document.getElementById('theme-toggle').addEventListener('click', function() {
         const html = document.documentElement;

@@ -1,8 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row gap-y-2 sm:items-center sm:justify-between">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">Appointment Diary</h2>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center justify-between sm:justify-end gap-2 sm:gap-4">
                 {{-- Diary switcher --}}
                 <form method="GET" action="{{ route('diary.index') }}" id="diary-switcher">
                     <input type="hidden" name="date" value="{{ $anchorDate->toDateString() }}">
@@ -28,11 +28,16 @@
                     </a>
                 </div>
 
-                {{-- Show cancelled toggle --}}
-                <a href="{{ route('diary.index', array_merge(request()->query(), ['show_cancelled' => $showCancelled ? '0' : '1'])) }}"
-                   class="text-sm {{ $showCancelled ? 'text-red-600 font-medium' : 'text-gray-500 hover:text-gray-700' }}">
-                    {{ $showCancelled ? 'Hide Cancelled' : 'Show Cancelled' }}
-                </a>
+                {{-- Show cancelled toggle slider --}}
+                <label class="flex items-center gap-1.5 cursor-pointer" title="{{ $showCancelled ? 'Hide' : 'Show' }} cancelled appointments">
+                    <span class="text-xs font-medium text-gray-600 dark:text-gray-300 select-none">Cancelled</span>
+                    <button type="button"
+                            onclick="window.location.href='{{ route('diary.index', array_merge(request()->query(), ['show_cancelled' => $showCancelled ? '0' : '1'])) }}'"
+                            role="switch" aria-checked="{{ $showCancelled ? 'true' : 'false' }}"
+                            class="relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 {{ $showCancelled ? 'bg-red-500 border-red-600' : 'bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500' }}">
+                        <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {{ $showCancelled ? 'translate-x-[22px]' : 'translate-x-0.5' }}"></span>
+                    </button>
+                </label>
             </div>
         </div>
     </x-slot>
@@ -50,8 +55,8 @@
             <div class="flex items-center justify-between mb-4">
                 @if($viewMode === 'day')
                     <a href="{{ route('diary.index', array_merge(request()->query(), ['date' => $anchorDate->copy()->subDay()->toDateString()])) }}"
-                       class="inline-flex items-center px-3 py-1.5 text-sm bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600">
-                        &larr; Previous Day
+                       class="inline-flex items-center gap-1 px-2.5 py-1.5 text-sm bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600">
+                        &larr;<span class="hidden sm:inline">Previous Day</span>
                     </a>
 
                     {{-- Centre: date label + calendar picker (day mode) --}}
@@ -139,13 +144,13 @@
                     </div>
 
                     <a href="{{ route('diary.index', array_merge(request()->query(), ['date' => $anchorDate->copy()->addDay()->toDateString()])) }}"
-                       class="inline-flex items-center px-3 py-1.5 text-sm bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600">
-                        Next Day &rarr;
+                       class="inline-flex items-center gap-1 px-2.5 py-1.5 text-sm bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600">
+                        <span class="hidden sm:inline">Next Day</span>&rarr;
                     </a>
                 @else
                     <a href="{{ route('diary.index', array_merge(request()->query(), ['date' => $anchorDate->copy()->subWeek()->toDateString()])) }}"
-                       class="inline-flex items-center px-3 py-1.5 text-sm bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600">
-                        &larr; Previous Week
+                       class="inline-flex items-center gap-1 px-2.5 py-1.5 text-sm bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600">
+                        &larr;<span class="hidden sm:inline">Previous Week</span>
                     </a>
 
                     {{-- Centre: date range label + calendar picker (week mode) --}}
@@ -235,8 +240,8 @@
                     </div>
 
                     <a href="{{ route('diary.index', array_merge(request()->query(), ['date' => $anchorDate->copy()->addWeek()->toDateString()])) }}"
-                       class="inline-flex items-center px-3 py-1.5 text-sm bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600">
-                        Next Week &rarr;
+                       class="inline-flex items-center gap-1 px-2.5 py-1.5 text-sm bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600">
+                        <span class="hidden sm:inline">Next Week</span>&rarr;
                     </a>
                 @endif
             </div>
@@ -270,7 +275,7 @@
                     <form method="POST" action="{{ route('appointments.store') }}">
                         @csrf
                         <input type="hidden" name="diary_id" value="{{ $diary->id }}">
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                             <div x-data="{
                                 query: '{{ old('patient_id') ? 'Patient #' . old('patient_id') : '' }}',
                                 patientId: {{ old('patient_id') ?? 'null' }},
@@ -425,7 +430,8 @@
                     }
                 @endphp
 
-                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="{{ $viewMode === 'week' ? 'overflow-x-auto' : '' }} rounded-lg border border-gray-200 dark:border-gray-700">
+                <div class="bg-white dark:bg-gray-800" style="{{ $viewMode === 'week' ? 'min-width: 1400px' : '' }}">
 
                     {{-- Sticky day-header row (outside the scroll container) --}}
                     <div class="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
@@ -694,6 +700,7 @@
                         </div>
                     </div>
                 </div>
+                </div>{{-- end overflow-x-auto --}}
 
                 {{-- Status colour legend --}}
                 <div class="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-600">
