@@ -481,7 +481,7 @@
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white">Appointment Summary</h3>
                     <button type="button" @click="step = 1" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">Edit</button>
                 </div>
-                <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                     <dt class="text-gray-500 dark:text-gray-400 font-medium">Date</dt>
                     <dd class="text-gray-900 dark:text-gray-100 font-semibold" x-text="formatDate(selectedDate)"></dd>
                     <dt class="text-gray-500 dark:text-gray-400 font-medium">Time</dt>
@@ -496,7 +496,7 @@
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white">Patient Details</h3>
                     <button type="button" @click="step = 2" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">Edit</button>
                 </div>
-                <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                     <dt class="text-gray-500 dark:text-gray-400 font-medium">Name</dt>
                     <dd class="text-gray-900 dark:text-gray-100 font-semibold" x-text="(firstName + ' ' + lastName).trim() || '—'"></dd>
                     <dt class="text-gray-500 dark:text-gray-400 font-medium">Address</dt>

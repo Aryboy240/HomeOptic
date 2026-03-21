@@ -71,10 +71,10 @@
                             </label>
                         </div>
                     </div>
-                    <div class="mt-4 flex items-center gap-3">
+                    <div class="mt-4 flex flex-wrap items-center gap-3">
                         <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700">Search</button>
                         <a href="{{ route('patients.index') }}" class="px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600">Clear</a>
-                        <div class="ml-auto flex items-center gap-2">
+                        <div class="sm:ml-auto flex items-center gap-2">
                             <label class="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Sort by</label>
                             <select name="sort" onchange="this.form.submit()"
                                 class="text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
@@ -96,7 +96,8 @@
                     <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">
                         {{ $results->total() }} {{ Str::plural('patient', $results->total()) }} found
                     </div>
-                        <table class="w-full text-sm">
+                        <div class="overflow-x-auto">
+                        <table class="w-full text-sm min-w-[600px]">
                             <thead>
                                 <tr class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
                                     <th class="text-left px-4 py-2 font-medium text-gray-600 dark:text-gray-400">ID</th>
@@ -135,6 +136,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        </div>{{-- end overflow-x-auto --}}
                         <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700">
                             {{ $results->withQueryString()->links() }}
                         </div>

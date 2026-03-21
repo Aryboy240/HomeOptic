@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
+        <div class="flex flex-wrap gap-y-2 items-start justify-between">
+            <div class="flex items-center gap-3 flex-wrap">
                 <a href="{{ route('patients.index') }}" class="text-gray-400 hover:text-gray-600">&larr;</a>
                 <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">
                     {{ $patient->title }} {{ $patient->first_name }} {{ $patient->surname }}
@@ -13,7 +13,7 @@
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">Diabetic</span>
                 @endif
             </div>
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
                 <a href="{{ route('patients.edit', $patient) }}"
                    class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600">
                     Edit Details
@@ -54,10 +54,10 @@
                 </div>
             @endif
 
-            <div class="grid grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {{-- Left column: info cards --}}
-                <div class="col-span-1 space-y-4">
+                <div class="lg:col-span-1 space-y-4">
                     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-4">
                         <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Personal</h3>
                         <dl class="space-y-2 text-sm">
@@ -157,7 +157,7 @@
                 </div>
 
                 {{-- Right column: examination history --}}
-                <div class="col-span-2">
+                <div class="lg:col-span-2">
                     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
                         <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                             <h3 class="font-medium text-gray-800 dark:text-gray-100">Examination History</h3>
@@ -167,7 +167,8 @@
                         @if($examinations->isEmpty())
                             <p class="text-gray-500 text-center py-10 text-sm">No examinations on record.</p>
                         @else
-                            <table class="w-full text-sm">
+                            <div class="overflow-x-auto">
+                            <table class="w-full text-sm min-w-[640px]">
                                 <thead>
                                     <tr class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
                                         <th class="text-left px-4 py-2 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Date</th>
@@ -298,6 +299,7 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                            </div>{{-- end overflow-x-auto --}}
                         @endif
                     </div>
                 </div>

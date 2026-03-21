@@ -8,7 +8,7 @@
 {{-- Personal details --}}
 <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-5 mb-5">
     <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100 uppercase tracking-wide mb-4">Personal Details</h3>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div>
             <x-input-label for="title" value="Title *" />
             <select id="title" name="title" required
@@ -85,8 +85,8 @@
 {{-- Address --}}
 <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-5 mb-5">
     <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100 uppercase tracking-wide mb-4">Address</h3>
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div class="col-span-2 md:col-span-3">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="sm:col-span-2 md:col-span-3">
             <x-input-label for="address_line_1" value="Address Line 1 *" />
             <x-text-input id="address_line_1" name="address_line_1" type="text" class="mt-1 block w-full" required
                 value="{{ old('address_line_1', $patient?->address_line_1) }}" />
@@ -122,7 +122,7 @@
 {{-- Clinical & Admin --}}
 <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-5 mb-5">
     <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100 uppercase tracking-wide mb-4">Clinical &amp; Admin</h3>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div>
             <x-input-label for="patient_type" value="Patient Type *" />
             <select id="patient_type" name="patient_type" required
@@ -308,7 +308,7 @@
         @php
             $selectedBenefits = old('benefits', $patient?->benefits ?? []);
         @endphp
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
             @foreach([
                 'income_support'            => 'Income Support',
                 'jobseekers_allowance'      => 'Income-based Jobseeker\'s Allowance',
@@ -329,7 +329,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
         <div>
             <x-input-label for="next_of_kin_name" value="Next of Kin Name" />
             <x-text-input id="next_of_kin_name" name="next_of_kin_name" type="text" class="mt-1 block w-full"
