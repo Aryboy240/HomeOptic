@@ -18,10 +18,10 @@ class NotificationStrategyFactory
      *   2. SMS    — patient has a mobile number but no email.
      *   3. Letter — fallback when neither email nor mobile is available.
      */
-    public static function for(Patient $patient): NotificationStrategy
+    public static function for(Patient $patient, string $reminderType = 'upcoming'): NotificationStrategy
     {
         if (!empty($patient->email)) {
-            return new EmailNotificationStrategy();
+            return new EmailNotificationStrategy($reminderType);
         }
 
         if (!empty($patient->telephone_mobile)) {

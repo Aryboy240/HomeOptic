@@ -12,9 +12,10 @@ class Examination extends Model
     protected $guarded = ['id'];
 
     protected $casts = [
-        'exam_type'   => ExamType::class,
-        'examined_at' => 'date',
-        'signed_at'   => 'datetime',
+        'exam_type'      => ExamType::class,
+        'examined_at'    => 'date',
+        'signed_at'      => 'datetime',
+        'last_edited_at' => 'datetime',
     ];
 
     // -------------------------------------------------------------------------
@@ -36,6 +37,12 @@ class Examination extends Model
     public function signedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'signed_by');
+    }
+
+    /** The user who last edited any tab of this examination. */
+    public function lastEditedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'last_edited_by');
     }
 
     // Tab child records — each is 1:1 and created by ExaminationFactory

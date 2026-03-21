@@ -17,15 +17,19 @@ class AppointmentReminderMail extends Mailable
      * The appointment model is a public property so it is automatically
      * available as $appointment in the mail view without explicit with().
      */
-    public function __construct(public readonly Appointment $appointment)
-    {
+    public function __construct(
+        public readonly Appointment $appointment,
+        public readonly string $reminderType = 'upcoming',
+    ) {
     }
 
     public function envelope(): Envelope
     {
-        return new Envelope(
-            subject: 'Your Appointment Reminder — HomeOptic',
-        );
+        $subject = $this->reminderType === 'tomorrow'
+            ? 'Your Appointment is Tomorrow — HomeOptic'
+            : 'Your Appointment Reminder — HomeOptic';
+
+        return new Envelope(subject: $subject);
     }
 
     public function content(): Content

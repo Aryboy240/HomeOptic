@@ -84,8 +84,9 @@ class ExaminationController extends Controller
         ]);
 
         $examination->historySymptoms->update($validated);
+        $examination->update(['last_edited_by' => $request->user()->id, 'last_edited_at' => now()]);
 
-        return redirect()->route('examinations.show', $examination)
+        return redirect(route('examinations.show', $examination) . '#tab-history')
             ->with('success', 'History & Symptoms saved.');
     }
 
@@ -125,8 +126,9 @@ class ExaminationController extends Controller
         ]);
 
         $examination->ophthalmoscopy->update($validated);
+        $examination->update(['last_edited_by' => $request->user()->id, 'last_edited_at' => now()]);
 
-        return redirect()->route('examinations.show', $examination)
+        return redirect(route('examinations.show', $examination) . '#tab-ophthalmoscopy')
             ->with('success', 'Ophthalmoscopy saved.');
     }
 
@@ -143,9 +145,11 @@ class ExaminationController extends Controller
             'pre_iop_r'                  => ['nullable', 'string', 'max:20'],
             'pre_iop_l'                  => ['nullable', 'string', 'max:20'],
             'pre_iop_time'               => ['nullable', 'string', 'max:8'],
+            'pre_iop_method'             => ['nullable', 'string', 'in:gat,icare,nct,perkins,tono_pen'],
             'post_iop_r'                 => ['nullable', 'string', 'max:20'],
             'post_iop_l'                 => ['nullable', 'string', 'max:20'],
             'post_iop_time'              => ['nullable', 'string', 'max:8'],
+            'post_iop_method'            => ['nullable', 'string', 'in:gat,icare,nct,perkins,tono_pen'],
             'ct_with_rx'                 => ['nullable', 'string', 'max:255'],
             'ct_with_rx_near'            => ['nullable', 'string', 'max:255'],
             'ct_with_rx_near_notes'      => ['nullable', 'string'],
@@ -168,12 +172,14 @@ class ExaminationController extends Controller
             'npc'                        => ['nullable', 'string', 'max:255'],
             'stereopsis'                 => ['nullable', 'string', 'max:255'],
             'colour_vision'              => ['nullable', 'string', 'max:255'],
+            'colour_vision_notes'        => ['nullable', 'string'],
             'amplitude_of_accommodation' => ['nullable', 'string', 'max:255'],
         ]);
 
         $examination->investigative->update($validated);
+        $examination->update(['last_edited_by' => $request->user()->id, 'last_edited_at' => now()]);
 
-        return redirect()->route('examinations.show', $examination)
+        return redirect(route('examinations.show', $examination) . '#tab-investigative')
             ->with('success', 'Investigative Techniques saved.');
     }
 
@@ -278,16 +284,18 @@ class ExaminationController extends Controller
             'rec_tint'              => ['boolean'],
             'rec_mar'               => ['boolean'],
             // NHS & retest
-            'nhs_voucher_dist'      => ['nullable', 'string', 'max:255'],
-            'nhs_voucher_near'      => ['nullable', 'string', 'max:255'],
+            'nhs_voucher_dist'      => ['nullable', 'string', 'in:A,B,C,D'],
+            'nhs_voucher_near'      => ['nullable', 'string', 'in:A,B,C,D'],
+            'nhs_voucher_bifocal'   => ['nullable', 'string', 'in:E,F,G,H'],
             'examination_comment'   => ['nullable', 'string'],
             'retest_after'          => ['nullable', 'string', 'max:50'],
             'retest_patient_type'   => ['nullable', 'string', 'max:1'],
         ]);
 
         $examination->refraction->update($validated);
+        $examination->update(['last_edited_by' => $request->user()->id, 'last_edited_at' => now()]);
 
-        return redirect()->route('examinations.show', $examination)
+        return redirect(route('examinations.show', $examination) . '#tab-refraction')
             ->with('success', 'Refraction saved.');
     }
 
@@ -326,8 +334,10 @@ class ExaminationController extends Controller
     public function sign(Request $request, Examination $examination): RedirectResponse
     {
         $examination->update([
-            'signed_by' => $request->user()->id,
-            'signed_at' => now(),
+            'signed_by'      => $request->user()->id,
+            'signed_at'      => now(),
+            'last_edited_by' => $request->user()->id,
+            'last_edited_at' => now(),
         ]);
 
         return redirect()->route('examinations.show', $examination)

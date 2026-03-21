@@ -152,11 +152,11 @@ class PatientController extends Controller
      */
     public function show(Patient $patient, GosEligibilityService $gos): View
     {
-        $patient->load(['practice', 'doctor', 'pct']);
+        $patient->load(['practice', 'doctor', 'pct', 'documents.uploadedBy']);
 
         $examinations = $patient->examinations()
-            ->with('staff')
-            ->orderBy('examined_at', 'desc')
+            ->with(['staff', 'refraction', 'lastEditedBy'])
+            ->orderBy('created_at', 'desc')
             ->get();
 
         // Sync auto-calculated eligibility (never overwrites admin_override)

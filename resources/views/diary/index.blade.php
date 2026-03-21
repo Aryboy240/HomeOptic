@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Appointment Diary</h2>
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">Appointment Diary</h2>
             <div class="flex items-center gap-4">
                 {{-- Diary switcher --}}
                 <form method="GET" action="{{ route('diary.index') }}" id="diary-switcher">
@@ -9,7 +9,7 @@
                     <input type="hidden" name="view" value="{{ $viewMode }}">
                     <input type="hidden" name="show_cancelled" value="{{ $showCancelled ? '1' : '0' }}">
                     <select name="diary_id" onchange="document.getElementById('diary-switcher').submit()"
-                        class="text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        class="text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                         @foreach($diaries as $d)
                             <option value="{{ $d->id }}" @selected($diary && $diary->id === $d->id)>{{ $d->name }}</option>
                         @endforeach
@@ -50,24 +50,192 @@
             <div class="flex items-center justify-between mb-4">
                 @if($viewMode === 'day')
                     <a href="{{ route('diary.index', array_merge(request()->query(), ['date' => $anchorDate->copy()->subDay()->toDateString()])) }}"
-                       class="inline-flex items-center px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">
+                       class="inline-flex items-center px-3 py-1.5 text-sm bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600">
                         &larr; Previous Day
                     </a>
-                    <h3 class="text-lg font-semibold text-gray-800">{{ $anchorDate->format('l, j F Y') }}</h3>
+
+                    {{-- Centre: date label + calendar picker (day mode) --}}
+                    <div class="relative flex items-center gap-2"
+                         x-data="{
+                             open: false,
+                             viewMode: 'day',
+                             diaryId: {{ $diary?->id ?? 'null' }},
+                             calYear: {{ $anchorDate->year }},
+                             calMonth: {{ $anchorDate->month - 1 }},
+                             anchorDateStr: '{{ $anchorDate->toDateString() }}',
+                             weekStart: '{{ $from->toDateString() }}',
+                             weekEnd:   '{{ $to->toDateString() }}',
+                             today:     '{{ now()->toDateString() }}',
+                             get monthLabel() {
+                                 return new Date(this.calYear, this.calMonth, 1)
+                                     .toLocaleString('default', { month: 'long', year: 'numeric' });
+                             },
+                             get calDays() {
+                                 const first  = new Date(this.calYear, this.calMonth, 1);
+                                 const total  = new Date(this.calYear, this.calMonth + 1, 0).getDate();
+                                 const offset = (first.getDay() + 6) % 7;
+                                 const days   = [];
+                                 for (let i = 0; i < offset; i++) days.push(null);
+                                 for (let d = 1; d <= total; d++) days.push(d);
+                                 return days;
+                             },
+                             pad(n) { return String(n).padStart(2, '0'); },
+                             dayStr(d) { return this.calYear + '-' + this.pad(this.calMonth + 1) + '-' + this.pad(d); },
+                             isToday(d) { return !!d && this.dayStr(d) === this.today; },
+                             isHighlighted(d) {
+                                 if (!d) return false;
+                                 const s = this.dayStr(d);
+                                 return this.viewMode === 'day' ? s === this.anchorDateStr : (s >= this.weekStart && s <= this.weekEnd);
+                             },
+                             prevMonth() { if (this.calMonth === 0) { this.calMonth = 11; this.calYear--; } else { this.calMonth--; } },
+                             nextMonth() { if (this.calMonth === 11) { this.calMonth = 0; this.calYear++; } else { this.calMonth++; } },
+                             navigate(d) {
+                                 if (!d) return;
+                                 const params = new URLSearchParams({ date: this.dayStr(d), view: this.viewMode, diary_id: this.diaryId });
+                                 window.location.href = '{{ route('diary.index') }}?' + params.toString();
+                                 this.open = false;
+                             }
+                         }"
+                         @click.outside="open = false">
+
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ $anchorDate->format('l, j F Y') }}</h3>
+
+                        <button @click="open = !open"
+                                class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                                title="Jump to date">&#128197;</button>
+
+                        {{-- Calendar popup --}}
+                        <div x-show="open" x-cloak
+                             class="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl p-3 select-none"
+                             style="width:240px">
+                            {{-- Month navigation --}}
+                            <div class="flex items-center justify-between mb-2">
+                                <button @click.stop="prevMonth()" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm">&larr;</button>
+                                <span class="text-sm font-semibold text-gray-800 dark:text-gray-100" x-text="monthLabel"></span>
+                                <button @click.stop="nextMonth()" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm">&rarr;</button>
+                            </div>
+                            {{-- Day-of-week headers --}}
+                            <div class="grid grid-cols-7 mb-1">
+                                <template x-for="h in ['Mo','Tu','We','Th','Fr','Sa','Su']" :key="h">
+                                    <div class="text-center text-xs font-medium text-gray-400 py-0.5" x-text="h"></div>
+                                </template>
+                            </div>
+                            {{-- Day cells --}}
+                            <div class="grid grid-cols-7 gap-px">
+                                <template x-for="(day, i) in calDays" :key="i">
+                                    <button @click.stop="navigate(day)"
+                                            :disabled="!day"
+                                            :class="[
+                                                !day ? 'invisible' : '',
+                                                day && isHighlighted(day) ? 'bg-indigo-600 text-white font-semibold rounded' : '',
+                                                day && isToday(day) && !isHighlighted(day) ? 'ring-2 ring-indigo-400 text-indigo-700 bg-indigo-50 rounded-full font-bold' : '',
+                                                day && !isToday(day) && !isHighlighted(day) ? 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded' : '',
+                                            ]"
+                                            class="text-xs py-1 text-center w-full leading-tight"
+                                            x-text="day ?? ''"></button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
                     <a href="{{ route('diary.index', array_merge(request()->query(), ['date' => $anchorDate->copy()->addDay()->toDateString()])) }}"
-                       class="inline-flex items-center px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">
+                       class="inline-flex items-center px-3 py-1.5 text-sm bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600">
                         Next Day &rarr;
                     </a>
                 @else
                     <a href="{{ route('diary.index', array_merge(request()->query(), ['date' => $anchorDate->copy()->subWeek()->toDateString()])) }}"
-                       class="inline-flex items-center px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">
+                       class="inline-flex items-center px-3 py-1.5 text-sm bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600">
                         &larr; Previous Week
                     </a>
-                    <h3 class="text-lg font-semibold text-gray-800">
-                        {{ $from->format('j F') }} – {{ $to->format('j F Y') }}
-                    </h3>
+
+                    {{-- Centre: date range label + calendar picker (week mode) --}}
+                    <div class="relative flex items-center gap-2"
+                         x-data="{
+                             open: false,
+                             viewMode: 'week',
+                             diaryId: {{ $diary?->id ?? 'null' }},
+                             calYear: {{ $anchorDate->year }},
+                             calMonth: {{ $anchorDate->month - 1 }},
+                             anchorDateStr: '{{ $anchorDate->toDateString() }}',
+                             weekStart: '{{ $from->toDateString() }}',
+                             weekEnd:   '{{ $to->toDateString() }}',
+                             today:     '{{ now()->toDateString() }}',
+                             get monthLabel() {
+                                 return new Date(this.calYear, this.calMonth, 1)
+                                     .toLocaleString('default', { month: 'long', year: 'numeric' });
+                             },
+                             get calDays() {
+                                 const first  = new Date(this.calYear, this.calMonth, 1);
+                                 const total  = new Date(this.calYear, this.calMonth + 1, 0).getDate();
+                                 const offset = (first.getDay() + 6) % 7;
+                                 const days   = [];
+                                 for (let i = 0; i < offset; i++) days.push(null);
+                                 for (let d = 1; d <= total; d++) days.push(d);
+                                 return days;
+                             },
+                             pad(n) { return String(n).padStart(2, '0'); },
+                             dayStr(d) { return this.calYear + '-' + this.pad(this.calMonth + 1) + '-' + this.pad(d); },
+                             isToday(d) { return !!d && this.dayStr(d) === this.today; },
+                             isHighlighted(d) {
+                                 if (!d) return false;
+                                 const s = this.dayStr(d);
+                                 return this.viewMode === 'day' ? s === this.anchorDateStr : (s >= this.weekStart && s <= this.weekEnd);
+                             },
+                             prevMonth() { if (this.calMonth === 0) { this.calMonth = 11; this.calYear--; } else { this.calMonth--; } },
+                             nextMonth() { if (this.calMonth === 11) { this.calMonth = 0; this.calYear++; } else { this.calMonth++; } },
+                             navigate(d) {
+                                 if (!d) return;
+                                 const params = new URLSearchParams({ date: this.dayStr(d), view: this.viewMode, diary_id: this.diaryId });
+                                 window.location.href = '{{ route('diary.index') }}?' + params.toString();
+                                 this.open = false;
+                             }
+                         }"
+                         @click.outside="open = false">
+
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                            {{ $from->format('j F') }} – {{ $to->format('j F Y') }}
+                        </h3>
+
+                        <button @click="open = !open"
+                                class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                                title="Jump to date">&#128197;</button>
+
+                        {{-- Calendar popup --}}
+                        <div x-show="open" x-cloak
+                             class="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl p-3 select-none"
+                             style="width:240px">
+                            {{-- Month navigation --}}
+                            <div class="flex items-center justify-between mb-2">
+                                <button @click.stop="prevMonth()" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm">&larr;</button>
+                                <span class="text-sm font-semibold text-gray-800 dark:text-gray-100" x-text="monthLabel"></span>
+                                <button @click.stop="nextMonth()" class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm">&rarr;</button>
+                            </div>
+                            {{-- Day-of-week headers --}}
+                            <div class="grid grid-cols-7 mb-1">
+                                <template x-for="h in ['Mo','Tu','We','Th','Fr','Sa','Su']" :key="h">
+                                    <div class="text-center text-xs font-medium text-gray-400 py-0.5" x-text="h"></div>
+                                </template>
+                            </div>
+                            {{-- Day cells --}}
+                            <div class="grid grid-cols-7 gap-px">
+                                <template x-for="(day, i) in calDays" :key="i">
+                                    <button @click.stop="navigate(day)"
+                                            :disabled="!day"
+                                            :class="[
+                                                !day ? 'invisible' : '',
+                                                day && isHighlighted(day) ? 'bg-indigo-600 text-white font-semibold rounded' : '',
+                                                day && isToday(day) && !isHighlighted(day) ? 'ring-2 ring-indigo-400 text-indigo-700 bg-indigo-50 rounded-full font-bold' : '',
+                                                day && !isToday(day) && !isHighlighted(day) ? 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded' : '',
+                                            ]"
+                                            class="text-xs py-1 text-center w-full leading-tight"
+                                            x-text="day ?? ''"></button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
                     <a href="{{ route('diary.index', array_merge(request()->query(), ['date' => $anchorDate->copy()->addWeek()->toDateString()])) }}"
-                       class="inline-flex items-center px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">
+                       class="inline-flex items-center px-3 py-1.5 text-sm bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600">
                         Next Week &rarr;
                     </a>
                 @endif
@@ -86,8 +254,8 @@
                 </div>
 
                 {{-- Quick new appointment form --}}
-                <div id="new-appt-form" class="{{ $errors->any() ? '' : 'hidden' }} mb-6 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-                    <h4 class="font-medium text-gray-800 mb-3">Book New Appointment</h4>
+                <div id="new-appt-form" class="{{ $errors->any() ? '' : 'hidden' }} mb-6 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+                    <h4 class="font-medium text-gray-800 dark:text-gray-100 mb-3">Book New Appointment</h4>
 
                     @if($errors->any())
                         <div class="mb-3 p-3 bg-red-50 border border-red-200 rounded-md">
@@ -128,96 +296,107 @@
                                     if (!this.patientId) return;
                                     this.patientId = null;
                                 }
-                            }" class="relative col-span-2">
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Patient</label>
-                                <input type="text"
-                                    x-model="query"
-                                    @input.debounce.250ms="fetchResults()"
-                                    @keydown.escape="open = false"
-                                    @focus="open = results.length > 0"
-                                    @click="clear()"
-                                    placeholder="Search by name or ID…"
-                                    autocomplete="off"
-                                    class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 @error('patient_id') border-red-500 @enderror"
-                                    :class="{ 'border-indigo-400 ring-1 ring-indigo-300': patientId }">
-                                <input type="hidden" name="patient_id" :value="patientId">
+                            }" class="col-span-2">
+                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Patient</label>
+                                <div class="flex items-start gap-2">
+                                    <div class="relative flex-1">
+                                        <input type="text"
+                                            x-model="query"
+                                            @input.debounce.250ms="fetchResults()"
+                                            @keydown.escape="open = false"
+                                            @focus="open = results.length > 0"
+                                            @click="clear()"
+                                            placeholder="Search by name or ID…"
+                                            autocomplete="off"
+                                            class="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 @error('patient_id') border-red-500 @enderror"
+                                            :class="{ 'border-indigo-400 ring-1 ring-indigo-300': patientId }">
+                                        <input type="hidden" name="patient_id" :value="patientId">
 
-                                {{-- Dropdown --}}
-                                <div x-show="open" x-cloak @click.outside="open = false"
-                                    class="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                                    <template x-for="patient in results" :key="patient.id">
-                                        <button type="button" @click="select(patient)"
-                                            class="w-full text-left px-3 py-2 text-sm hover:bg-indigo-50 flex items-baseline justify-between gap-2">
-                                            <span>
-                                                <span x-text="patient.first_name + ' ' + patient.surname" class="font-medium text-gray-800"></span>
-                                                <span x-text="'DOB ' + patient.date_of_birth" class="ml-2 text-xs text-gray-500"></span>
-                                            </span>
-                                            <span x-text="'#' + patient.id" class="text-xs text-gray-400 shrink-0"></span>
-                                        </button>
-                                    </template>
+                                        {{-- Dropdown --}}
+                                        <div x-show="open" x-cloak @click.outside="open = false"
+                                            class="absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                                            <template x-for="patient in results" :key="patient.id">
+                                                <button type="button" @click="select(patient)"
+                                                    class="w-full text-left px-3 py-2 text-sm hover:bg-indigo-50 dark:hover:bg-indigo-900/30 flex items-baseline justify-between gap-2">
+                                                    <span>
+                                                        <span x-text="patient.first_name + ' ' + patient.surname" class="font-medium text-gray-800 dark:text-gray-100"></span>
+                                                        <span x-text="'DOB ' + patient.date_of_birth" class="ml-2 text-xs text-gray-500 dark:text-gray-400"></span>
+                                                    </span>
+                                                    <span x-text="'#' + patient.id" class="text-xs text-gray-400 shrink-0"></span>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    {{-- New Patient button --}}
+                                    <a href="{{ route('patients.create') }}" target="_blank"
+                                        class="flex-shrink-0 inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 transition-colors" style="margin-top: 5px;">
+                                        + New Patient
+                                    </a>
                                 </div>
 
                                 {{-- Selected / loading state --}}
                                 <p x-show="patientId" class="mt-0.5 text-xs text-indigo-600 font-medium" x-text="'Patient #' + patientId + ' selected'"></p>
                                 <p x-show="loading && !patientId" class="mt-0.5 text-xs text-gray-400">Searching…</p>
+                                <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Opens in new tab — search for the patient after creating them</p>
                                 @error('patient_id')
                                     <p class="mt-0.5 text-xs text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Date</label>
+                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
                                 <input id="form-date" type="date" name="date" required
                                     value="{{ old('date', $anchorDate->toDateString()) }}"
-                                    class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 @error('date') border-red-500 @enderror">
+                                    class="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 @error('date') border-red-500 @enderror">
                                 @error('date')
                                     <p class="mt-0.5 text-xs text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Start Time</label>
+                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Start Time</label>
                                 <input id="form-start-time" type="time" name="start_time" required step="300"
                                     value="{{ old('start_time') }}"
-                                    class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 @error('start_time') border-red-500 @enderror">
+                                    class="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 @error('start_time') border-red-500 @enderror">
                                 @error('start_time')
                                     <p class="mt-0.5 text-xs text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Length (min)</label>
+                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Length (min)</label>
                                 <input type="number" name="length_minutes" required min="1"
                                     value="{{ old('length_minutes', 30) }}"
-                                    class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    class="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Type</label>
+                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
                                 <select name="appointment_type" required
-                                    class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    class="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                                     @foreach($appointmentTypes as $value => $label)
                                         <option value="{{ $value }}" @selected(old('appointment_type') === $value)>{{ $label }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
                                 <select name="appointment_status" required
-                                    class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    class="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                                     @foreach($appointmentStatuses as $value => $label)
                                         <option value="{{ $value }}" @selected(old('appointment_status') === $value)>{{ $label }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-span-2">
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Display Text (optional)</label>
+                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Display Text (optional)</label>
                                 <input type="text" name="display_text"
                                     value="{{ old('display_text') }}"
                                     placeholder="e.g. domiciliary – extra time needed"
-                                    class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    class="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                             </div>
                         </div>
                         <div class="mt-3 flex gap-2">
                             <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700">Book</button>
                             <button type="button" onclick="document.getElementById('new-appt-form').classList.add('hidden')"
-                                class="px-4 py-2 bg-white text-gray-700 text-sm font-medium border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
+                                class="px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600">Cancel</button>
                         </div>
                     </form>
                 </div>
@@ -246,16 +425,16 @@
                     }
                 @endphp
 
-                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
 
                     {{-- Sticky day-header row (outside the scroll container) --}}
-                    <div class="flex border-b border-gray-200 bg-gray-50">
-                        <div class="flex-shrink-0 border-r border-gray-200" style="width: 3.5rem"></div>
+                    <div class="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+                        <div class="flex-shrink-0 border-r border-gray-200 dark:border-gray-700" style="width: 3.5rem"></div>
                         @if($viewMode === 'week')
                             @foreach($days as $day)
                                 <div class="flex-1 text-center py-2 border-r border-gray-100 last:border-r-0 {{ $day->isToday() ? 'bg-indigo-50' : '' }}">
-                                    <p class="text-xs font-medium text-gray-500 uppercase">{{ $day->format('D') }}</p>
-                                    <p class="text-sm font-semibold {{ $day->isToday() ? 'text-indigo-700' : 'text-gray-800' }}">{{ $day->format('j M') }}</p>
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $day->format('D') }}</p>
+                                    <p class="text-sm font-semibold {{ $day->isToday() ? 'text-indigo-700 dark:text-indigo-400' : 'text-gray-800 dark:text-gray-100' }}">{{ $day->format('j M') }}</p>
                                 </div>
                             @endforeach
                         @else
@@ -271,7 +450,7 @@
                         <div class="flex" style="height: {{ $totalHeight }}px">
 
                             {{-- Time axis --}}
-                            <div class="flex-shrink-0 border-r border-gray-200 relative bg-gray-50" style="display: flex; justify-content: center; width: 3.5rem; height: {{ $totalHeight }}px">
+                            <div class="flex-shrink-0 border-r border-gray-200 dark:border-gray-700 relative bg-gray-50 dark:bg-gray-700/50" style="display: flex; justify-content: center; width: 3.5rem; height: {{ $totalHeight }}px">
                                 @for($min = $gridStart; $min < $gridEnd; $min += 30)
                                     @php $labelTop = ($min - $gridStart) * $pxPerMin; @endphp
                                     <div class="absolute right-1 text-right text-xs text-gray-400 leading-none select-none"
@@ -379,6 +558,7 @@
                                                title="{{ $appt->patient?->first_name }} {{ $appt->patient?->surname }} — {{ \Carbon\Carbon::parse($appt->start_time)->format('H:i') }}"
                                                class="block rounded px-1 overflow-hidden hover:opacity-80"
                                                style="{{ $blockStyle }}"
+                                               data-status="{{ $sKey }}"
                                                @click.stop>
                                                 <p class="text-xs font-bold leading-tight truncate" style="margin-top:2px">
                                                     {{ \Carbon\Carbon::parse($appt->start_time)->format('H:i') }}–{{ $endTime }}
@@ -488,6 +668,7 @@
                                         <a href="{{ route('appointments.edit', $appt) }}"
                                            class="block rounded px-2 overflow-hidden hover:opacity-80"
                                            style="{{ $blockStyle }}"
+                                           data-status="{{ $sKey }}"
                                            @click.stop>
                                             <p class="text-xs font-bold leading-tight" style="margin-top:2px">
                                                 {{ \Carbon\Carbon::parse($appt->start_time)->format('H:i') }} – {{ $endTime }}

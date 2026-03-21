@@ -107,12 +107,41 @@ th { background: #e0e0e0; text-align: center; font-weight: bold; }
 </div>
 
 <script>
+function initSignaturePad(canvasId, hiddenInputId) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    const input = document.getElementById(hiddenInputId);
+    let drawing = false;
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+    function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: (clientX - rect.left) * (canvas.width / rect.width), y: (clientY - rect.top) * (canvas.height / rect.height) };
+    }
+    canvas.addEventListener('mousedown', e => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener('mousemove', e => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+    canvas.addEventListener('mouseup', () => { drawing = false; input.value = canvas.toDataURL(); });
+    canvas.addEventListener('mouseleave', () => { drawing = false; });
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); }, { passive: false });
+    canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }, { passive: false });
+    canvas.addEventListener('touchend', () => { drawing = false; input.value = canvas.toDataURL(); });
+}
+function clearSig(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    const input = document.getElementById(canvasId + '-data');
+    if (input) input.value = '';
+}
 function saveEgosForm() {
     const fields = [];
     document.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(function(el, i) {
         var entry = { index: i, type: el.type || 'text', name: el.name || null, value: el.value };
         if (el.type === 'checkbox' || el.type === 'radio') { entry.checked = el.checked; }
         fields.push(entry);
+    });
+    document.querySelectorAll('input[type=hidden][id^="sig-"]').forEach(function(el) {
+        if (el.value) fields.push({ sigId: el.id, name: el.name, value: el.value, type: 'sig' });
     });
     fetch('{{ route('egos.store') }}', {
         method: 'POST',
@@ -134,10 +163,23 @@ function saveEgosForm() {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    initSignaturePad('sig-gos6-patient-part2',    'sig-gos6-patient-part2-data');
+    initSignaturePad('sig-gos6-performer-part3',  'sig-gos6-performer-part3-data');
+    initSignaturePad('sig-gos6-contractor-part3', 'sig-gos6-contractor-part3-data');
+
     const saved = @json($savedFormData ?? []);
     if (!saved.length) return;
     const inputs = document.querySelectorAll('input:not([type=hidden]), select, textarea');
     saved.forEach(function(entry) {
+        if (entry.type === 'sig' && entry.sigId) {
+            var hi = document.getElementById(entry.sigId);
+            if (hi && entry.value) {
+                hi.value = entry.value;
+                var cv = document.getElementById(entry.sigId.replace('-data', ''));
+                if (cv) { var img = new Image(); img.onload = function() { cv.getContext('2d').drawImage(img, 0, 0); }; img.src = entry.value; }
+            }
+            return;
+        }
         const el = inputs[entry.index];
         if (!el) return;
         if (entry.type === 'checkbox' || entry.type === 'radio') {
@@ -191,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <span class="lbl">Postcode</span>{!! $cb($patient->post_code, 8) !!}
     </div>
     <div class="fl" style="margin-top:4px;">
-        <span class="lbl">Date of birth</span>{!! $dobBoxes($patient->date_of_birth) !!}
+        <span class="lbl">Date of birth</span><input type="date" class="inp" style="width:130px;" value="{{ $patient->date_of_birth->format('Y-m-d') }}">
         <span class="lbl" style="margin-left:14px;">NHS No</span>
         <input type="text" class="inp" style="width:90px;">
         <span class="lbl" style="margin-left:10px;">N.I. No</span>
@@ -199,7 +241,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     <div class="fl">
         <span class="lbl">Date of last sight test</span>
-        <input type="text" class="inp" style="width:80px;" placeholder="DD/MM/YYYY">
+        <input type="date" class="inp" style="width:130px;">
         <label class="chk" style="margin-left:10px;"><input type="checkbox">&nbsp;First test</label>
         <label class="chk" style="margin-left:6px;"><input type="checkbox">&nbsp;Not known</label>
     </div>
@@ -251,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <strong>Person getting benefit —</strong>
         Name <input type="text" class="inp" style="width:130px;">
         NI No <input type="text" class="inp" style="width:90px;">
-        DOB <input type="text" class="inp" style="width:75px;" placeholder="DD/MM/YYYY">
+        DOB <input type="date" class="inp" style="width:100px;">
     </div>
     <div class="fl" style="margin-top:5px;">
         <div class="chk">
@@ -288,8 +330,11 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="g2">
         <div>
             <p style="font-size:8pt; font-weight:bold; margin-bottom:2px;">Signature</p>
-            <div class="sig"></div>
-            <p style="font-size:8.5pt; margin-top:4px;">Date&nbsp;<input type="text" class="inp" style="width:90px;" placeholder="DD/MM/YYYY"></p>
+            <canvas id="sig-gos6-patient-part2" width="400" height="80" style="display:block; width:100%; max-width:400px; height:80px; border:1px solid #000; background:#fff; cursor:crosshair; margin-top:4px;"></canvas>
+            <input type="hidden" id="sig-gos6-patient-part2-data" name="sig-gos6-patient-part2">
+            <button type="button" class="no-print" onclick="clearSig('sig-gos6-patient-part2')" style="font-size:7pt; color:#555; background:none; border:1px solid #bbb; border-radius:2px; padding:1px 6px; cursor:pointer; margin-top:2px;">Clear</button>
+            <p class="no-print" style="font-size:7pt; color:#888; margin-top:1px; font-style:italic;">Sign here (use mouse or touch)</p>
+            <p style="font-size:8.5pt; margin-top:4px;">Date&nbsp;<input type="date" class="inp" style="width:130px;" value="{{ date('Y-m-d') }}"></p>
         </div>
         <div>
             <p style="font-size:8pt; font-weight:bold; margin-bottom:2px;">Name</p>
@@ -334,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="section">
         <div class="fl">
             <span class="lbl">Date of sight test</span>
-            <input type="text" class="inp" style="width:90px;" placeholder="DD/MM/YYYY">
+            <input type="date" class="inp" style="width:130px;">
             <span class="lbl" style="margin-left:16px;">Re-test code</span>
             <input type="text" class="inp" style="width:55px;">
         </div>
@@ -400,11 +445,16 @@ document.addEventListener('DOMContentLoaded', function() {
             <span class="lbl" style="margin-left:10px;">Performers list number</span>
             <input type="text" class="inp" style="width:75px;">
             <span class="lbl" style="margin-left:10px;">Date</span>
-            <input type="text" class="inp" style="width:85px;" placeholder="DD/MM/YYYY">
+            <input type="date" class="inp" style="width:130px;">
         </div>
-        <div class="fl" style="margin-top:3px;">
+        <div class="fl" style="margin-top:3px; align-items:flex-start;">
             <span class="lbl">Performer's signature</span>
-            <div class="sig" style="width:180px;"></div>
+            <div>
+                <canvas id="sig-gos6-performer-part3" width="300" height="70" style="display:block; width:300px; height:70px; border:1px solid #000; background:#fff; cursor:crosshair;"></canvas>
+                <input type="hidden" id="sig-gos6-performer-part3-data" name="sig-gos6-performer-part3">
+                <button type="button" class="no-print" onclick="clearSig('sig-gos6-performer-part3')" style="font-size:7pt; color:#555; background:none; border:1px solid #bbb; border-radius:2px; padding:1px 6px; cursor:pointer; margin-top:2px;">Clear</button>
+                <p class="no-print" style="font-size:7pt; color:#888; margin-top:1px; font-style:italic;">Sign here (use mouse or touch)</p>
+            </div>
         </div>
 
         {{-- CLAIM section --}}
@@ -432,8 +482,11 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="g2">
                 <div>
                     <p style="font-size:8pt; font-weight:bold; margin-bottom:2px;">Signature</p>
-                    <div class="sig"></div>
-                    <p style="font-size:8.5pt; margin-top:4px;">Date&nbsp;<input type="text" class="inp" style="width:85px;" placeholder="DD/MM/YYYY"></p>
+                    <canvas id="sig-gos6-contractor-part3" width="400" height="80" style="display:block; width:100%; max-width:400px; height:80px; border:1px solid #000; background:#fff; cursor:crosshair; margin-top:4px;"></canvas>
+                    <input type="hidden" id="sig-gos6-contractor-part3-data" name="sig-gos6-contractor-part3">
+                    <button type="button" class="no-print" onclick="clearSig('sig-gos6-contractor-part3')" style="font-size:7pt; color:#555; background:none; border:1px solid #bbb; border-radius:2px; padding:1px 6px; cursor:pointer; margin-top:2px;">Clear</button>
+                    <p class="no-print" style="font-size:7pt; color:#888; margin-top:1px; font-style:italic;">Sign here (use mouse or touch)</p>
+                    <p style="font-size:8.5pt; margin-top:4px;">Date&nbsp;<input type="date" class="inp" style="width:130px;"></p>
                     <p style="font-size:8.5pt; margin-top:3px;">Name&nbsp;<input type="text" class="inp" style="width:150px;"></p>
                 </div>
                 <div>

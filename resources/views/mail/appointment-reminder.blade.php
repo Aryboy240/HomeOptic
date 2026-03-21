@@ -3,7 +3,11 @@
 
 Dear {{ $appointment->patient->first_name }},
 
+@if(($reminderType ?? 'upcoming') === 'tomorrow')
+This is a reminder that your appointment with **HomeOptic** is **tomorrow**.
+@else
 This is a reminder of your upcoming appointment with **HomeOptic**.
+@endif
 
 @component('mail::table')
 | | |

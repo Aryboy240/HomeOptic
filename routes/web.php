@@ -5,6 +5,7 @@ use App\Http\Controllers\DiaryController;
 use App\Http\Controllers\EgosController;
 use App\Http\Controllers\ExaminationController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\PatientDocumentController;
 use App\Http\Controllers\PatientGosFormController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
     Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
     Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
+    Route::post('/patients/{patient}/documents', [PatientDocumentController::class, 'store'])->name('patients.documents.store');
+    Route::get('/documents/{document}/download', [PatientDocumentController::class, 'download'])->name('documents.download');
+    Route::delete('/documents/{document}', [PatientDocumentController::class, 'destroy'])->name('documents.destroy');
 
     // ── eGOS Claims ──────────────────────────────────────────────────────────
     Route::get('/egos', [EgosController::class, 'index'])->name('egos.index');

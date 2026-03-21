@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <a href="{{ route('patients.index') }}" class="text-gray-400 hover:text-gray-600">&larr;</a>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">
                     {{ $patient->title }} {{ $patient->first_name }} {{ $patient->surname }}
                 </h2>
                 @if($patient->has_glaucoma)
@@ -15,7 +15,7 @@
             </div>
             <div class="flex gap-2">
                 <a href="{{ route('patients.edit', $patient) }}"
-                   class="inline-flex items-center px-4 py-2 bg-white text-gray-700 text-sm font-medium border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">
+                   class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600">
                     Edit Details
                 </a>
                 @php $hasSigned = $examinations->whereNotNull('signed_at')->isNotEmpty(); @endphp
@@ -54,66 +54,66 @@
                 </div>
             @endif
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="grid grid-cols-3 gap-6">
 
-                {{-- Patient details panel --}}
-                <div class="md:col-span-1 space-y-4">
-                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Personal</h3>
+                {{-- Left column: info cards --}}
+                <div class="col-span-1 space-y-4">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-4">
+                        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Personal</h3>
                         <dl class="space-y-2 text-sm">
                             <div class="flex justify-between">
-                                <dt class="text-gray-500">ID</dt>
-                                <dd class="font-mono text-gray-800">{{ $patient->id }}</dd>
+                                <dt class="text-gray-500 dark:text-gray-400">ID</dt>
+                                <dd class="font-mono text-gray-800 dark:text-gray-200">{{ $patient->id }}</dd>
                             </div>
                             <div class="flex justify-between">
-                                <dt class="text-gray-500">DOB</dt>
-                                <dd class="text-gray-800">{{ $patient->date_of_birth->format('d/m/Y') }}</dd>
+                                <dt class="text-gray-500 dark:text-gray-400">DOB</dt>
+                                <dd class="text-gray-800 dark:text-gray-200">{{ $patient->date_of_birth->format('d/m/Y') }}</dd>
                             </div>
                             <div class="flex justify-between">
-                                <dt class="text-gray-500">Age</dt>
-                                <dd class="text-gray-800">{{ $patient->date_of_birth->age }} years</dd>
+                                <dt class="text-gray-500 dark:text-gray-400">Age</dt>
+                                <dd class="text-gray-800 dark:text-gray-200">{{ $patient->date_of_birth->age }} years</dd>
                             </div>
                             <div class="flex justify-between">
-                                <dt class="text-gray-500">Sex / Gender</dt>
-                                <dd class="text-gray-800">{{ $patient->sex_gender?->label() }}</dd>
+                                <dt class="text-gray-500 dark:text-gray-400">Sex / Gender</dt>
+                                <dd class="text-gray-800 dark:text-gray-200">{{ $patient->sex_gender?->label() }}</dd>
                             </div>
                             <div class="flex justify-between">
-                                <dt class="text-gray-500">Patient Type</dt>
-                                <dd class="text-gray-800">{{ $patient->patient_type?->label() }}</dd>
+                                <dt class="text-gray-500 dark:text-gray-400">Patient Type</dt>
+                                <dd class="text-gray-800 dark:text-gray-200">{{ $patient->patient_type?->label() }}</dd>
                             </div>
                             @if($patient->is_nhs)
                                 <div class="flex justify-between">
-                                    <dt class="text-gray-500">NHS</dt>
+                                    <dt class="text-gray-500 dark:text-gray-400">NHS</dt>
                                     <dd class="text-green-700 font-medium">Yes</dd>
                                 </div>
                             @endif
                         </dl>
                     </div>
 
-                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Contact</h3>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-4">
+                        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Contact</h3>
                         <dl class="space-y-2 text-sm">
                             @if($patient->email)
                                 <div>
-                                    <dt class="text-gray-500">Email</dt>
-                                    <dd class="text-gray-800 break-all">{{ $patient->email }}</dd>
+                                    <dt class="text-gray-500 dark:text-gray-400">Email</dt>
+                                    <dd class="text-gray-800 dark:text-gray-200 break-all">{{ $patient->email }}</dd>
                                 </div>
                             @endif
                             @if($patient->telephone_mobile)
                                 <div>
-                                    <dt class="text-gray-500">Mobile</dt>
-                                    <dd class="text-gray-800">{{ $patient->telephone_mobile }}</dd>
+                                    <dt class="text-gray-500 dark:text-gray-400">Mobile</dt>
+                                    <dd class="text-gray-800 dark:text-gray-200">{{ $patient->telephone_mobile }}</dd>
                                 </div>
                             @endif
                             @if($patient->telephone_other)
                                 <div>
-                                    <dt class="text-gray-500">Other</dt>
-                                    <dd class="text-gray-800">{{ $patient->telephone_other }}</dd>
+                                    <dt class="text-gray-500 dark:text-gray-400">Other</dt>
+                                    <dd class="text-gray-800 dark:text-gray-200">{{ $patient->telephone_other }}</dd>
                                 </div>
                             @endif
                             <div>
-                                <dt class="text-gray-500">Address</dt>
-                                <dd class="text-gray-800">
+                                <dt class="text-gray-500 dark:text-gray-400">Address</dt>
+                                <dd class="text-gray-800 dark:text-gray-200">
                                     {{ $patient->address_line_1 }}<br>
                                     {{ $patient->town_city }}, {{ $patient->post_code }}
                                     @if($patient->county), {{ $patient->county }}@endif
@@ -123,24 +123,24 @@
                     </div>
 
                     @if($patient->practice || $patient->doctor)
-                        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Practice &amp; GP</h3>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-4">
+                            <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Practice &amp; GP</h3>
                             <dl class="space-y-2 text-sm">
                                 @if($patient->practice)
                                     <div>
-                                        <dt class="text-gray-500">Practice</dt>
-                                        <dd class="text-gray-800">{{ $patient->practice->name }}</dd>
+                                        <dt class="text-gray-500 dark:text-gray-400">Practice</dt>
+                                        <dd class="text-gray-800 dark:text-gray-200">{{ $patient->practice->name }}</dd>
                                     </div>
                                 @endif
                                 @if($patient->doctor)
                                     <div>
-                                        <dt class="text-gray-500">GP</dt>
-                                        <dd class="text-gray-800">{{ $patient->doctor->name }}</dd>
+                                        <dt class="text-gray-500 dark:text-gray-400">GP</dt>
+                                        <dd class="text-gray-800 dark:text-gray-200">{{ $patient->doctor->name }}</dd>
                                     </div>
                                 @elseif($patient->doctor_other)
                                     <div>
-                                        <dt class="text-gray-500">GP</dt>
-                                        <dd class="text-gray-800">{{ $patient->doctor_other }}</dd>
+                                        <dt class="text-gray-500 dark:text-gray-400">GP</dt>
+                                        <dd class="text-gray-800 dark:text-gray-200">{{ $patient->doctor_other }}</dd>
                                     </div>
                                 @endif
                             </dl>
@@ -148,18 +148,19 @@
                     @endif
 
                     @if($patient->notes)
-                        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-4">
                             <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Notes</h3>
-                            <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $patient->notes }}</p>
+                            <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $patient->notes }}</p>
                         </div>
                     @endif
+
                 </div>
 
-                {{-- Examination history --}}
-                <div class="md:col-span-2">
-                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
-                        <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
-                            <h3 class="font-medium text-gray-800">Examination History</h3>
+                {{-- Right column: examination history --}}
+                <div class="col-span-2">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                        <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                            <h3 class="font-medium text-gray-800 dark:text-gray-100">Examination History</h3>
                             <span class="text-sm text-gray-500">{{ $examinations->count() }} {{ Str::plural('record', $examinations->count()) }}</span>
                         </div>
 
@@ -168,38 +169,110 @@
                         @else
                             <table class="w-full text-sm">
                                 <thead>
-                                    <tr class="bg-gray-50 border-b border-gray-200">
-                                        <th class="text-left px-4 py-2 font-medium text-gray-600">Date</th>
-                                        <th class="text-left px-4 py-2 font-medium text-gray-600">Type</th>
-                                        <th class="text-left px-4 py-2 font-medium text-gray-600">Examiner</th>
-                                        <th class="text-left px-4 py-2 font-medium text-gray-600">Signed</th>
-                                        <th class="text-left px-4 py-2 font-medium text-gray-600">Report</th>
+                                    <tr class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                                        <th class="text-left px-4 py-2 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Date</th>
+                                        <th class="text-left px-4 py-2 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Examiner</th>
+                                        <th class="text-left px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Subjective Rx</th>
+                                        <th class="text-left px-4 py-2 font-medium text-gray-600 dark:text-gray-400">Notes</th>
+                                        <th class="text-left px-4 py-2 font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Report / Status</th>
                                         <th class="px-4 py-2"></th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-100">
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                     @foreach($examinations as $exam)
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-4 py-2 text-gray-800">{{ $exam->examined_at->format('d/m/Y') }}</td>
-                                            <td class="px-4 py-2 text-gray-600">{{ $exam->exam_type->label() }}</td>
-                                            <td class="px-4 py-2 text-gray-600">{{ $exam->staff?->name }}</td>
-                                            <td class="px-4 py-2">
-                                                @if($exam->signed_at)
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                                                        Signed {{ $exam->signed_at->format('d/m/Y') }}
+                                        @php
+                                            $rx = $exam->refraction;
+
+                                            // Format a numeric value with mandatory sign; null if absent or zero
+                                            $fmtSigned = function(?string $v): ?string {
+                                                if ($v === null || $v === '') return null;
+                                                $n = (float) $v;
+                                                if ($n === 0.0) return null;
+                                                return ($n >= 0 ? '+' : '') . number_format($n, 2);
+                                            };
+
+                                            // True if a field value is considered present
+                                            $hasValue = fn($v) => $v !== null && $v !== '' && !(is_numeric($v) && (float) $v === 0.0);
+
+                                            // Ordered display fields: [column suffix, label, signed numeric?]
+                                            $rxFields = [
+                                                ['uav',         'UAV',     false],
+                                                ['sph',         'SPH',     true],
+                                                ['cyl',         'CYL',     true],
+                                                ['axis',        'Axis',    false],
+                                                ['va',          'VA',      false],
+                                                ['near_add',    'Add',     true],
+                                                ['near_acuity', 'Near VA', false],
+                                                ['int_add',     'Int',     true],
+                                            ];
+
+                                            // Build one Rx line for an eye using only fields with real values
+                                            $rxLine = function(string $eye) use ($rx, $fmtSigned, $hasValue, $rxFields): string {
+                                                if (!$rx) return '—';
+                                                $parts = [];
+                                                foreach ($rxFields as [$suffix, $label, $signed]) {
+                                                    $v = $rx->{"subj_{$eye}_{$suffix}"};
+                                                    if (!$hasValue($v)) continue;
+                                                    $parts[] = $label . ' ' . ($signed ? $fmtSigned((string) $v) : $v);
+                                                }
+                                                return empty($parts) ? '—' : implode(', ', $parts);
+                                            };
+
+                                            // $hasRx: true if any subj_r_* or subj_l_* attribute has a real value
+                                            $hasRx = false;
+                                            if ($rx) {
+                                                foreach ($rx->getAttributes() as $col => $v) {
+                                                    if ((str_starts_with($col, 'subj_r_') || str_starts_with($col, 'subj_l_')) && $hasValue($v)) {
+                                                        $hasRx = true;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            $rxR = $rxLine('r');
+                                            $rxL = $rxLine('l');
+
+                                            // Notes: prefer examination_comment, fall back to exam notes
+                                            $rawNote = $rx?->examination_comment ?? $exam->notes ?? '';
+                                            $note = mb_strlen($rawNote) > 60
+                                                ? mb_substr($rawNote, 0, 60) . '…'
+                                                : $rawNote;
+                                        @endphp
+                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                            <td class="px-4 py-2 text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                                                {{ $exam->examined_at->format('d/m/Y') }}
+                                                <span class="block text-xs text-gray-400 dark:text-gray-500">{{ $exam->created_at->format('H:i') }}</span>
+                                            </td>
+                                            <td class="px-4 py-2 max-w-xs">
+                                                <span class="text-gray-600 dark:text-gray-400">{{ $exam->staff?->name ?? '—' }}</span>
+                                                @if($exam->last_edited_at)
+                                                    <span class="block text-xs text-gray-400 dark:text-gray-500 whitespace-normal break-words">
+                                                        Edited: {{ $exam->lastEditedBy?->name ?? '—' }} {{ $exam->last_edited_at->format('d/m/Y H:i') }}
                                                     </span>
-                                                @else
-                                                    <span class="text-gray-400 text-xs">Unsigned</span>
                                                 @endif
                                             </td>
-                                            <td class="px-4 py-2">
+                                            <td class="px-4 py-2" style="min-width:180px">
+                                                @if($hasRx)
+                                                    <a href="{{ route('examinations.show', $exam) . '#tab-refraction' }}"
+                                                       class="text-xs text-gray-700 dark:text-gray-300 whitespace-normal break-words">
+                                                        <p><span class="font-medium text-gray-500 dark:text-gray-400">R:</span> {{ $rxR }}</p>
+                                                        <p><span class="font-medium text-gray-500 dark:text-gray-400">L:</span> {{ $rxL }}</p>
+                                                    </a>
+                                                @else
+                                                    <span class="text-xs text-gray-400 dark:text-gray-500">—</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-4 py-2 text-xs text-gray-600 dark:text-gray-400 max-w-[180px]">
+                                                {{ $note ?: '—' }}
+                                            </td>
+                                            <td class="px-4 py-2 whitespace-nowrap">
                                                 @if($exam->report_path)
                                                     <a href="{{ route('examinations.report', $exam) }}"
                                                        class="text-xs font-medium text-green-700 hover:text-green-900 hover:underline">
                                                         Download PDF
                                                     </a>
                                                 @else
-                                                    <span class="text-xs text-gray-300">
+                                                    <span class="text-xs text-gray-300 dark:text-gray-600">
                                                         {{ $exam->signed_at ? 'Generating…' : 'Not signed' }}
                                                     </span>
                                                 @endif
@@ -208,12 +281,12 @@
                                                 <div class="flex items-center justify-end gap-3">
                                                     <a href="{{ route('examinations.show', $exam) }}" class="text-indigo-600 hover:text-indigo-800 text-xs">Open</a>
                                                     @if($exam->signed_at)
-                                                        <span class="text-xs text-gray-300 cursor-not-allowed" style="padding-left: 10px;" title="Signed examinations cannot be deleted">Delete</span>
+                                                        <span style="padding-left: 10px;" class="text-xs text-gray-300 dark:text-gray-600 cursor-not-allowed" title="Signed examinations cannot be deleted">Delete</span>
                                                     @else
                                                         <form method="POST" action="{{ route('examinations.destroy', $exam) }}">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="submit" class="text-xs text-red-600 hover:text-red-800" style="padding-left: 10px;" 
+                                                            <button style="padding-left: 10px" type="submit" class="text-xs text-red-600 hover:text-red-800"
                                                                 onclick="return confirm('Are you sure you want to delete this examination? This cannot be undone.')">
                                                                 Delete
                                                             </button>
@@ -230,25 +303,25 @@
                 </div>
             </div>
 
-            {{-- GOS Forms --}}
-            <div class="mt-5 bg-white rounded-lg border border-gray-200 shadow-sm">
-                <div class="px-5 py-3 border-b border-gray-100">
-                    <h3 class="font-medium text-gray-800">GOS Forms</h3>
+            {{-- GOS Forms — full width --}}
+            <div class="mt-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700">
+                    <h3 class="font-medium text-gray-800 dark:text-gray-100">GOS Forms</h3>
                 </div>
-                <div class="divide-y divide-gray-100">
+                <div class="divide-y divide-gray-100 dark:divide-gray-700">
                     @foreach(['GOS1' => 'GOS1 — NHS Sight Test', 'GOS3' => 'GOS3 — NHS Optical Voucher', 'GOS6' => 'GOS6 — Domiciliary Visit'] as $type => $label)
                         @php $form = $gosforms[$type] ?? null; $eligible = $form?->effectiveEligibility() ?? false; @endphp
                         <div class="px-5 py-4" x-data="{ open: false }">
                             <div class="flex items-center justify-between gap-4">
                                 <div class="flex items-center gap-3">
-                                    <span class="text-sm font-medium text-gray-800">{{ $label }}</span>
+                                    <span class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ $label }}</span>
                                     @if($eligible)
                                         <span style="background:#dcfce7; color:#15803d;" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium">Eligible</span>
                                     @else
                                         <span style="background:#fee2e2; color:#b91c1c;" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium">Not Eligible</span>
                                     @endif
                                     @if($form && $form->admin_override !== null)
-                                        <span class="text-xs text-gray-400 italic">Manually overridden</span>
+                                        <span class="text-xs text-gray-400 dark:text-gray-500 italic">Manually overridden</span>
                                     @endif
                                 </div>
                                 <div class="flex items-center gap-3">
@@ -266,20 +339,20 @@
                             </div>
 
                             @if($form && $form->override_note)
-                                <p class="mt-1 text-xs text-gray-500 italic">Note: {{ $form->override_note }}</p>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 italic">Note: {{ $form->override_note }}</p>
                             @endif
 
-                            <div x-show="open" x-cloak class="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200">
-                                <p class="text-xs text-gray-500 mb-2">Override auto-calculated eligibility for this patient.</p>
+                            <div x-show="open" x-cloak class="mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-600">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Override auto-calculated eligibility for this patient.</p>
                                 <div class="flex flex-wrap gap-2 items-end">
                                     <form method="POST" action="{{ route('patients.gos.update', [$patient, $type]) }}" class="flex flex-wrap gap-2 items-end">
                                         @csrf
                                         <input type="hidden" name="admin_override" value="1">
                                         <div>
-                                            <label class="text-xs text-gray-500 block mb-1">Override note (optional)</label>
+                                            <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Override note (optional)</label>
                                             <input type="text" name="override_note" value="{{ $form?->override_note }}"
                                                 placeholder="Reason for override"
-                                                class="text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 w-56">
+                                                class="text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 w-56">
                                         </div>
                                         <button type="submit"
                                             style="background:#15803d; color:#fff;"
@@ -300,7 +373,7 @@
                                         <form method="POST" action="{{ route('patients.gos.clear', [$patient, $type]) }}">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 border border-gray-300 rounded-md bg-white">
+                                            <button type="submit" class="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
                                                 Clear Override
                                             </button>
                                         </form>
@@ -310,6 +383,78 @@
                         </div>
                     @endforeach
                 </div>
+            </div>
+
+            {{-- Documents — full width --}}
+            <div class="mt-5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                    <h3 class="font-medium text-gray-800 dark:text-gray-100">Documents</h3>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ $patient->documents->count() }} {{ Str::plural('file', $patient->documents->count()) }}</span>
+                </div>
+
+                {{-- Upload form --}}
+                <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                    <form method="POST" action="{{ route('patients.documents.store', $patient) }}" enctype="multipart/form-data"
+                          class="flex flex-wrap items-end gap-3">
+                        @csrf
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">PDF File</label>
+                            <input type="file" name="file" accept=".pdf" required
+                                   class="text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                            @error('file')
+                                <p class="mt-0.5 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="flex-1 min-w-[180px]">
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Description <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span></label>
+                            <input type="text" name="description" value="{{ old('description') }}" maxlength="255"
+                                   placeholder="e.g. Referral letter, Consent form…"
+                                   class="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <button type="submit"
+                                class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-indigo-700">
+                            Upload
+                        </button>
+                    </form>
+                </div>
+
+                {{-- Document list --}}
+                @if($patient->documents->isEmpty())
+                    <p class="px-5 py-8 text-center text-sm text-gray-400 dark:text-gray-500" style="padding: 10px 0 10px 0">No documents uploaded yet.</p>
+                @else
+                    <ul class="divide-y divide-gray-100 dark:divide-gray-700">
+                        @foreach($patient->documents->sortByDesc('created_at') as $doc)
+                            <li class="px-5 py-3 flex items-center justify-between gap-4">
+                                <div class="min-w-0">
+                                    <p class="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{{ $doc->filename }}</p>
+                                    @if($doc->description)
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $doc->description }}</p>
+                                    @endif
+                                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                                        {{ $doc->created_at->format('d/m/Y H:i') }}
+                                        @if($doc->uploadedBy)
+                                            &middot; {{ $doc->uploadedBy->name }}
+                                        @endif
+                                    </p>
+                                </div>
+                                <div class="flex items-center gap-3 shrink-0">
+                                    <a href="{{ route('documents.download', $doc) }}"
+                                       class="text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline">
+                                        Download
+                                    </a>
+                                    <form method="POST" action="{{ route('documents.destroy', $doc) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-xs text-red-600 hover:text-red-800"
+                                                onclick="return confirm('Delete this document? This cannot be undone.')">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
             </div>
 
         </div>

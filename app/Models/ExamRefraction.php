@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ExamOutcome;
+use App\Enums\NhsVoucherType;
 use App\Enums\PatientType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,8 +16,11 @@ class ExamRefraction extends Model
     protected $guarded = ['id'];
 
     protected $casts = [
-        'outcome'             => ExamOutcome::class,
-        'retest_patient_type' => PatientType::class,
+        'outcome'              => ExamOutcome::class,
+        'retest_patient_type'  => PatientType::class,
+        'nhs_voucher_dist'     => NhsVoucherType::class,
+        'nhs_voucher_near'     => NhsVoucherType::class,
+        'nhs_voucher_bifocal'  => NhsVoucherType::class,
         // Recommendation checkboxes
         'rec_distance'        => 'boolean',
         'rec_near'            => 'boolean',
