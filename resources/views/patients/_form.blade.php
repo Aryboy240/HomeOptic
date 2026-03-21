@@ -52,13 +52,13 @@
         <div>
             <x-input-label for="email" value="Email" />
             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
-                value="{{ old('email', $patient?->email) }}" />
+                value="{{ old('email', $patient?->email) }}" required />
             <x-input-error :messages="$errors->get('email')" class="mt-1" />
         </div>
         <div>
             <x-input-label for="telephone_mobile" value="Mobile" />
             <x-text-input id="telephone_mobile" name="telephone_mobile" type="text" class="mt-1 block w-full"
-                value="{{ old('telephone_mobile', $patient?->telephone_mobile) }}" maxlength="20" />
+                value="{{ old('telephone_mobile', $patient?->telephone_mobile) }}" maxlength="20" required />
             <x-input-error :messages="$errors->get('telephone_mobile')" class="mt-1" />
         </div>
         <div>
