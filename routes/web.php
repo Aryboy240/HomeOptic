@@ -50,6 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
     Route::post('/patients/{patient}/documents', [PatientDocumentController::class, 'store'])->name('patients.documents.store');
     Route::get('/documents/{document}/download', [PatientDocumentController::class, 'download'])->name('documents.download');
+    Route::get('/documents/{document}/view', [PatientDocumentController::class, 'view'])->name('documents.view');
     Route::delete('/documents/{document}', [PatientDocumentController::class, 'destroy'])->name('documents.destroy');
 
     // ── eGOS Claims ──────────────────────────────────────────────────────────

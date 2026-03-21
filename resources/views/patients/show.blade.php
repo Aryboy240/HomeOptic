@@ -385,10 +385,10 @@
                 </div>
             </div>
 
-            {{-- Documents — full width --}}
+            {{-- Documents & Images — full width --}}
             <div class="mt-5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                    <h3 class="font-medium text-gray-800 dark:text-gray-100">Documents</h3>
+                    <h3 class="font-medium text-gray-800 dark:text-gray-100">Documents &amp; Images</h3>
                     <span class="text-sm text-gray-500 dark:text-gray-400">{{ $patient->documents->count() }} {{ Str::plural('file', $patient->documents->count()) }}</span>
                 </div>
 
@@ -397,18 +397,27 @@
                     <form method="POST" action="{{ route('patients.documents.store', $patient) }}" enctype="multipart/form-data"
                           class="flex flex-wrap items-end gap-3">
                         @csrf
+                        <div class="w-full sm:w-48">
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Title <span class="text-red-500">*</span></label>
+                            <input type="text" name="title" value="{{ old('title') }}" maxlength="255" required
+                                   placeholder="e.g. Referral letter, Fundus photo…"
+                                   class="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            @error('title')
+                                <p class="mt-0.5 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">PDF File</label>
-                            <input type="file" name="file" accept=".pdf" required
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">File <span class="text-red-500">*</span> <span class="font-normal text-gray-400">(PDF or image)</span></label>
+                            <input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" required
                                    class="text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                             @error('file')
                                 <p class="mt-0.5 text-xs text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
                         <div class="flex-1 min-w-[180px]">
-                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Description <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span></label>
-                            <input type="text" name="description" value="{{ old('description') }}" maxlength="255"
-                                   placeholder="e.g. Referral letter, Consent form…"
+                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Notes <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span></label>
+                            <input type="text" name="description" value="{{ old('description') }}" maxlength="1000"
+                                   placeholder="Optional notes…"
                                    class="w-full text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                         </div>
                         <button type="submit"
@@ -418,17 +427,34 @@
                     </form>
                 </div>
 
-                {{-- Document list --}}
+                {{-- File list --}}
                 @if($patient->documents->isEmpty())
-                    <p class="px-5 py-8 text-center text-sm text-gray-400 dark:text-gray-500" style="padding: 10px 0 10px 0">No documents uploaded yet.</p>
+                    <p class="px-5 py-4 text-center text-sm text-gray-400 dark:text-gray-500">No files uploaded yet.</p>
                 @else
                     <ul class="divide-y divide-gray-100 dark:divide-gray-700">
                         @foreach($patient->documents->sortByDesc('created_at') as $doc)
-                            <li class="px-5 py-3 flex items-center justify-between gap-4">
-                                <div class="min-w-0">
-                                    <p class="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{{ $doc->filename }}</p>
+                            <li class="px-5 py-3 flex items-start gap-4">
+                                {{-- Image thumbnail --}}
+                                @if($doc->file_type === 'image')
+                                    <a href="{{ route('documents.view', $doc) }}" target="_blank" class="shrink-0">
+                                        <img src="{{ route('documents.view', $doc) }}"
+                                             alt="{{ $doc->title }}"
+                                             class="w-16 h-16 object-cover rounded-md border border-gray-200 dark:border-gray-600">
+                                    </a>
+                                @else
+                                    <div class="shrink-0 w-16 h-16 flex items-center justify-center rounded-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
+                                        <svg class="w-7 h-7 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                        </svg>
+                                    </div>
+                                @endif
+
+                                {{-- Details --}}
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ $doc->title }}</p>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500">{{ $doc->filename }}</p>
                                     @if($doc->description)
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $doc->description }}</p>
+                                        <p class="text-xs text-gray-600 dark:text-gray-300 mt-0.5">{{ $doc->description }}</p>
                                     @endif
                                     <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                                         {{ $doc->created_at->format('d/m/Y H:i') }}
@@ -437,7 +463,15 @@
                                         @endif
                                     </p>
                                 </div>
-                                <div class="flex items-center gap-3 shrink-0">
+
+                                {{-- Actions --}}
+                                <div class="flex items-center gap-3 shrink-0 mt-0.5">
+                                    @if($doc->file_type === 'image')
+                                        <a href="{{ route('documents.view', $doc) }}" target="_blank"
+                                           class="text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline">
+                                            View
+                                        </a>
+                                    @endif
                                     <a href="{{ route('documents.download', $doc) }}"
                                        class="text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline">
                                         Download
@@ -446,7 +480,7 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-xs text-red-600 hover:text-red-800"
-                                                onclick="return confirm('Delete this document? This cannot be undone.')">
+                                                onclick="return confirm('Delete this file? This cannot be undone.')">
                                             Delete
                                         </button>
                                     </form>
