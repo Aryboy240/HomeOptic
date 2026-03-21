@@ -106,7 +106,7 @@
                     <input type="date"
                            x-model="selectedDate"
                            @change="fetchSlots()"
-                           min="{{ date('Y-m-d') }}"
+                           min="{{ date('Y-m-d', strtotime('+1 day')) }}"
                            class="w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
 
@@ -153,7 +153,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Reason for Appointment</label>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Reason for Appointment <span class="text-red-500">*</span></label>
                         <textarea name="reason" rows="3"
                                   placeholder="e.g. routine check-up, difficulty seeing in low light, prescription review…"
                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none">{{ old('reason') }}</textarea>
@@ -546,7 +546,7 @@
     function bookingForm() {
         return {
             step: {{ old('_step', 1) }},
-            selectedDate: '{{ old('appointment_date', date('Y-m-d')) }}',
+            selectedDate: '{{ old('appointment_date', date('Y-m-d', strtotime('+1 day'))) }}',
             selectedTime: '{{ old('appointment_time', '') }}',
             selectedType: '{{ old('appointment_type', '') }}',
             firstName: '{{ old('first_name', '') }}',
@@ -601,7 +601,25 @@
             },
 
             step1Next() {
-                if (!this.selectedTime || !this.selectedType) return;
+                const today = new Date().toISOString().split('T')[0];
+                if (!this.selectedTime || !this.selectedType || this.selectedDate <= today) return;
+
+                const reasonEl = document.querySelector('[name="reason"]');
+                if (reasonEl) {
+                    reasonEl.classList.remove('border-red-400', 'dark:border-red-600');
+                    const existing = reasonEl.parentElement.querySelector('.field-error');
+                    if (existing) existing.remove();
+                    if (!reasonEl.value.trim()) {
+                        reasonEl.classList.add('border-red-400', 'dark:border-red-600');
+                        const err = document.createElement('p');
+                        err.className = 'field-error text-xs text-red-500 mt-1';
+                        err.textContent = 'Reason for Appointment is required.';
+                        reasonEl.parentElement.appendChild(err);
+                        reasonEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        return;
+                    }
+                }
+
                 this.step = 2;
                 window.scrollTo(0, 0);
             },

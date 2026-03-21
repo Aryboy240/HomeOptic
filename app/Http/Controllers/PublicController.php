@@ -131,10 +131,10 @@ class PublicController extends Controller
     {
         $validated = $request->validate([
             // Booking
-            'appointment_date' => ['required', 'date', 'after_or_equal:today'],
+            'appointment_date' => ['required', 'date', 'after:today'],
             'appointment_time' => ['required', 'date_format:H:i'],
             'appointment_type' => ['required', 'string', 'in:routine_eye_test,domiciliary,follow_up'],
-            'reason'           => ['nullable', 'string', 'max:2000'],
+            'reason'           => ['required', 'string', 'max:2000'],
             'examiner_notes'   => ['nullable', 'string', 'max:2000'],
             'customer_email'   => ['required', 'email', 'max:255'],
             // Patient — core
