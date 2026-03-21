@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminNotificationController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\DiaryController;
 use App\Http\Controllers\EgosController;
@@ -8,11 +9,16 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PatientDocumentController;
 use App\Http\Controllers\PatientGosFormController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return redirect()->route('diary.index');
-});
+// ── Public (no auth) ─────────────────────────────────────────────────────────
+Route::get('/', [PublicController::class, 'home'])->name('home');
+Route::get('/book', [PublicController::class, 'book'])->name('book');
+Route::get('/api/available-slots', [PublicController::class, 'availableSlots']);
+Route::get('/api/check-postcode', [PublicController::class, 'checkPostcode']);
+Route::post('/book', [PublicController::class, 'submitBooking'])->name('book.submit');
+Route::get('/booking/{token}/confirmed', [PublicController::class, 'bookingConfirmed'])->name('booking.confirmed');
 
 Route::get('/dashboard', function () {
     return redirect()->route('diary.index');
@@ -44,6 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
     Route::post('/patients/{patient}/documents', [PatientDocumentController::class, 'store'])->name('patients.documents.store');
     Route::get('/documents/{document}/download', [PatientDocumentController::class, 'download'])->name('documents.download');
+    Route::get('/documents/{document}/view', [PatientDocumentController::class, 'view'])->name('documents.view');
     Route::delete('/documents/{document}', [PatientDocumentController::class, 'destroy'])->name('documents.destroy');
 
     // ── eGOS Claims ──────────────────────────────────────────────────────────
@@ -69,6 +76,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/examinations/{examination}/sign', [ExaminationController::class, 'sign'])->name('examinations.sign');
     Route::delete('/examinations/{examination}', [ExaminationController::class, 'destroy'])->name('examinations.destroy');
     Route::get('/examinations/{examination}/report', [ExaminationController::class, 'report'])->name('examinations.report');
+
+    // ── Admin Notifications & Booking Decisions ───────────────────────────────
+    Route::get('/admin/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/admin/notifications/{notification}/read', [AdminNotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/admin/pending-bookings/{pendingBooking}/approve', [AdminNotificationController::class, 'approve'])->name('bookings.approve');
+    Route::post('/admin/pending-bookings/{pendingBooking}/decline', [AdminNotificationController::class, 'decline'])->name('bookings.decline');
 });
 
 require __DIR__.'/auth.php';

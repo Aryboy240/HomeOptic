@@ -79,6 +79,11 @@ class Patient extends Model
         return $this->hasMany(PatientDocument::class);
     }
 
+    public function pendingBookings(): HasMany
+    {
+        return $this->hasMany(PendingBooking::class);
+    }
+
     // -------------------------------------------------------------------------
     // Scopes
     // -------------------------------------------------------------------------
