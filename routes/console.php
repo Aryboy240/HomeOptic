@@ -11,3 +11,7 @@ Artisan::command('inspire', function () {
 // Send day-before appointment reminders every morning at 08:00.
 // Requires the scheduler to be running: `php artisan schedule:run` (cron: * * * * *)
 Schedule::command('reminders:send-day-before')->dailyAt('08:00');
+
+// Check for unreviewed pending bookings every hour.
+// Sends a 24h reminder email to admin, then auto-declines at 48h.
+Schedule::command('bookings:expire-pending')->hourly();

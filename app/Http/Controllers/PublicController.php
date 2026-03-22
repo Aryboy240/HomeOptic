@@ -64,7 +64,10 @@ class PublicController extends Controller
                 $blocks[] = [$start, $start + ($a->length_minutes ?? 30)];
             });
 
-        PendingBooking::where('appointment_date', $date)
+        // 'pending' is intentionally included — a slot is blocked as soon as a customer
+        // submits a request, not only after admin approval. This prevents race conditions
+        // where two customers book the same slot before either is approved or declined.
+        PendingBooking::whereDate('appointment_date', $date)
             ->whereIn('status', ['pending', 'approved'])
             ->get(['appointment_time'])
             ->each(function ($b) use (&$blocks) {
@@ -75,14 +78,12 @@ class PublicController extends Controller
         // A 30-minute slot starting at T is taken if any block overlaps [T, T+30)
         $takenSlots = [];
         for ($h = 8; $h < 20; $h++) {
-            foreach ([0, 30] as $m) {
-                $slotStart = $h * 60 + $m;
-                $slotEnd   = $slotStart + 30;
-                foreach ($blocks as [$bStart, $bEnd]) {
-                    if ($bStart < $slotEnd && $bEnd > $slotStart) {
-                        $takenSlots[] = sprintf('%02d:%02d', $h, $m);
-                        break;
-                    }
+            $slotStart = $h * 60;
+            $slotEnd   = $slotStart + 30;
+            foreach ($blocks as [$bStart, $bEnd]) {
+                if ($bStart < $slotEnd && $bEnd > $slotStart) {
+                    $takenSlots[] = sprintf('%02d:00', $h);
+                    break;
                 }
             }
         }
@@ -177,6 +178,30 @@ class PublicController extends Controller
 
         // Distance check
         $this->enforceDistanceLimit($validated['post_code']);
+
+        // Slot conflict check — block if a pending/approved booking or diary appointment already occupies this slot
+        $slotStart = $this->timeToMinutes($validated['appointment_time']);
+        $slotEnd   = $slotStart + 30;
+
+        $pendingConflict = PendingBooking::whereDate('appointment_date', $validated['appointment_date'])
+            ->where('appointment_time', $validated['appointment_time'])
+            ->whereIn('status', ['pending', 'approved'])
+            ->exists();
+
+        $diaryConflict = !$pendingConflict && Appointment::whereDate('date', $validated['appointment_date'])
+            ->whereNull('cancelled_at')
+            ->get(['start_time', 'length_minutes'])
+            ->contains(function ($a) use ($slotStart, $slotEnd) {
+                $aStart = $this->timeToMinutes(substr($a->start_time, 0, 5));
+                $aEnd   = $aStart + ($a->length_minutes ?? 30);
+                return $aStart < $slotEnd && $aEnd > $slotStart;
+            });
+
+        if ($pendingConflict || $diaryConflict) {
+            throw ValidationException::withMessages([
+                'appointment_time' => 'Sorry, that time slot has just been taken. Please go back and choose another.',
+            ]);
+        }
 
         // Separate booking vs patient fields
         $bookingFields = [

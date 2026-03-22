@@ -48,7 +48,7 @@
 
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10"
      x-data="bookingForm()"
-     x-init="fetchSlots()">
+     x-init="init()">
 
     {{-- Step indicator --}}
     <div class="flex items-center gap-2 mb-10">
@@ -110,6 +110,15 @@
                            class="w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
 
+                {{-- Slot conflict error --}}
+                <div x-show="slotConflictError" x-cloak
+                     class="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-300 flex items-start gap-2">
+                    <svg class="h-4 w-4 mt-0.5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/>
+                    </svg>
+                    <span x-text="slotConflictError"></span>
+                </div>
+
                 {{-- Time grid --}}
                 <div class="mb-2">
                     <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
@@ -119,7 +128,7 @@
                     <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
                         <template x-for="slot in slots" :key="slot">
                             <button type="button"
-                                    @click="!isTaken(slot) && (selectedTime = slot)"
+                                    @click="!isTaken(slot) && (selectedTime = slot, slotConflictError = '')"
                                     :disabled="isTaken(slot)"
                                     :class="{
                                         'bg-blue-700 text-white border-blue-700 font-semibold': selectedTime === slot,
@@ -516,7 +525,8 @@
                     </svg>
                     Back
                 </button>
-                <button type="submit"
+                <button type="button"
+                        @click="trySubmit()"
                         class="inline-flex items-center gap-2 px-7 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors shadow-md">
                     <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -556,17 +566,26 @@
             customerEmail: '{{ old('customer_email', old('email', '')) }}',
             takenSlots: [],
             loadingSlots: false,
+            slotConflictError: '',
             postcodeChecking: false,
             postcodeOk: true,
             postcodeError: '',
+
+            init() {
+                this.fetchSlots();
+                // Re-fetch slots whenever the user returns to step 1 so the grid
+                // reflects any bookings made while they were filling in their details.
+                this.$watch('step', val => {
+                    if (val === 1) this.fetchSlots();
+                });
+            },
 
             get slots() {
                 const s = [];
                 for (let h = 8; h < 20; h++) {
                     s.push(String(h).padStart(2, '0') + ':00');
-                    s.push(String(h).padStart(2, '0') + ':30');
                 }
-                return s; // 08:00 – 19:30 (24 slots)
+                return s; // 08:00 – 19:00 (12 slots)
             },
 
             isTaken(slot) {
@@ -576,12 +595,33 @@
             async fetchSlots() {
                 if (!this.selectedDate) return;
                 this.loadingSlots = true;
+                this.slotConflictError = '';
                 try {
                     const r = await fetch('/api/available-slots?date=' + this.selectedDate);
                     this.takenSlots = await r.json();
                     if (this.selectedTime && this.isTaken(this.selectedTime)) this.selectedTime = '';
                 } catch (e) {}
                 this.loadingSlots = false;
+            },
+
+            async trySubmit() {
+                // Re-check availability immediately before submitting to catch
+                // slots taken by another user while this customer was filling in their details.
+                try {
+                    const r = await fetch('/api/available-slots?date=' + this.selectedDate);
+                    const taken = await r.json();
+                    this.takenSlots = taken;
+                    if (taken.includes(this.selectedTime)) {
+                        this.selectedTime = '';
+                        this.slotConflictError = 'Sorry, this time slot was just taken by another booking. Please select a different time.';
+                        this.step = 1;
+                        window.scrollTo(0, 0);
+                        return;
+                    }
+                } catch (e) {
+                    // If the check fails (network error), allow the server-side validation to catch it
+                }
+                document.getElementById('booking-form').submit();
             },
 
             async checkPostcode() {

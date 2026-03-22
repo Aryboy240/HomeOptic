@@ -81,7 +81,7 @@ class AdminNotificationController extends Controller
                     'appointment_status' => AppointmentStatus::Booked->value,
                     'date'               => $pendingBooking->appointment_date,
                     'start_time'         => $pendingBooking->appointment_time,
-                    'length_minutes'     => 60,
+                    'length_minutes'     => 30,
                     'display_text'       => $patient->first_name . ' ' . $patient->surname,
                 ]);
             });

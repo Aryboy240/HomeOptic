@@ -8,6 +8,15 @@ A domiciliary optician management system built for **Psk Locum Cover Ltd** — a
 
 Father dearest is a qualified optician who is looking to start his own domiciliary service — visiting patients at home, typically elderly people who can't travel to a practice. To understand the domain properly before building anything, I researched Blink OMS, a real commercial optician management platform used by an existing practice. I used Blink as the reference for this prototype, basing the data model and workflows on a proven real-world system rather than guessing at requirements.
 
+![Homepage](screenshots/Homepage.png)
+*Public-facing homepage — service overview with mobile-responsive navigation*
+
+![Public Booking](screenshots/Bookings.png)
+*Online appointment request — step-by-step booking flow with time slot selection*
+
+![Confirmed Booking](screenshots/ConfirmedBooking.png)
+*Booking confirmation screen shown to patients after submitting a request*
+
 ---
 
 ## AI Tool: Claude Code
@@ -80,6 +89,18 @@ php artisan reminders:send-day-before --date=2026-03-21
 - Patient documents section — upload and download PDFs attached to a patient's profile
 - Audit trail on examinations — last edited by and timestamp
 
+![Patients Index](screenshots/Patients.png)
+*Patient list with search and sort filters*
+
+![New Patient](screenshots/New_Patient.png)
+*Patient creation form — personal, contact, address, medical, and social/benefits fields*
+
+![View Patient](screenshots/View_Patient.png)
+*Patient profile — GOS eligibility badges, examination history, and document attachments*
+
+![Patient Attachments](screenshots/Patient_Attachments.png)
+*Document upload and download — PDFs attached directly to the patient record*
+
 ### GOS Eligibility
 - Automatic GOS1, GOS3, and GOS6 eligibility calculation based on patient data (age, medical conditions, benefits)
 - Admin override with reason — can manually mark eligible/not eligible per form
@@ -98,6 +119,9 @@ php artisan reminders:send-day-before --date=2026-03-21
 - Save Form button saves filled form data to the eGOS submissions system
 - Back button is context-aware — returns to patient profile or eGOS page depending on origin
 
+![eGOS Form](screenshots/eGOS_Form.png)
+*GOS form — patient data pre-filled, eligibility checkboxes auto-ticked, canvas signature pad*
+
 ### eGOS Claims Management
 - Dedicated eGOS page (Diary -> Patients -> eGOS in navigation)
 - Table showing: patient, form type, voucher value, batch reference, submitted date, status badge
@@ -107,6 +131,9 @@ php artisan reminders:send-day-before --date=2026-03-21
 - **Batch Mark Paid** — marks selected submissions as Accepted
 - Delete submissions (unsubmitted only)
 - Form data saved per submission — reopening a saved form repopulates all fields
+
+![eGOS Batch](screenshots/eGOS_Batch.png)
+*eGOS claims table — batch submit, batch mark paid, date/type/status filters*
 
 ### Appointment Diary
 - Week and day view time-grid calendar (08:00-20:00)
@@ -120,6 +147,9 @@ php artisan reminders:send-day-before --date=2026-03-21
 - Show/hide cancelled appointments toggle
 - Calendar icon date picker for navigating to specific weeks/days
 - Conflict error display with form repopulation on validation failure
+
+![Diary](screenshots/Diary.png)
+*Week-view time-grid — colour-coded appointments, click-to-book slot detection*
 
 ### Examination Records
 - Spectacle examination workflow with four tabs:
@@ -168,6 +198,9 @@ Appointment created
 - Generates A4 PDF covering all four exam tabs using DomPDF
 - Stored to `storage/app/private/reports/examination-{id}.pdf`
 - Download link appears on patient profile examination history
+
+![Notifications](screenshots/Notifications.png)
+*Admin notifications panel — reminder queue status and channel strategy*
 
 ---
 
