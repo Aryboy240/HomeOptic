@@ -431,7 +431,7 @@
                 @endphp
 
                 <div class="{{ $viewMode === 'week' ? 'overflow-x-auto' : '' }} rounded-lg border border-gray-200 dark:border-gray-700">
-                <div class="bg-white dark:bg-gray-800" style="{{ $viewMode === 'week' ? 'min-width: 1400px' : '' }}">
+                <div id="diary-grid" class="bg-white dark:bg-gray-800">
 
                     {{-- Sticky day-header row (outside the scroll container) --}}
                     <div class="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
@@ -730,4 +730,15 @@
 
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const grid = document.getElementById('diary-grid');
+            if (grid && {{ $viewMode === 'week' ? 'true' : 'false' }}) {
+                if (window.innerWidth < 1024) {
+                    grid.style.minWidth = '1400px';
+                }
+            }
+        });
+    </script>
 </x-app-layout>

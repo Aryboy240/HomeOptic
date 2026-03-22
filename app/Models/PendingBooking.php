@@ -13,6 +13,7 @@ class PendingBooking extends Model
     protected $casts = [
         'appointment_date'  => 'date',
         'admin_decision_at' => 'datetime',
+        'reminder_sent_at'  => 'datetime',
         'patient_form_data' => 'array',
     ];
 
