@@ -159,10 +159,12 @@ class PatientController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Sync auto-calculated eligibility (never overwrites admin_override)
-        foreach (['GOS1' => $gos->isEligibleGos1($patient),
-                  'GOS3' => $gos->isEligibleGos3($patient),
-                  'GOS6' => $gos->isEligibleGos6($patient)] as $formType => $eligible) {
+        // Sync auto-calculated eligibility (never overwrites admin_override).
+        // GOS18 is manual-only — is_eligible is always false; admin_override drives effective eligibility.
+        foreach (['GOS1'  => $gos->isEligibleGos1($patient),
+                  'GOS3'  => $gos->isEligibleGos3($patient),
+                  'GOS6'  => $gos->isEligibleGos6($patient),
+                  'GOS18' => false] as $formType => $eligible) {
             PatientGosForm::updateOrCreate(
                 ['patient_id' => $patient->id, 'form_type' => $formType],
                 ['is_eligible' => $eligible]
@@ -242,9 +244,10 @@ class PatientController extends Controller
         $patient->refresh();
 
         $gos = app(GosEligibilityService::class);
-        foreach (['GOS1' => $gos->isEligibleGos1($patient),
-                  'GOS3' => $gos->isEligibleGos3($patient),
-                  'GOS6' => $gos->isEligibleGos6($patient)] as $formType => $eligible) {
+        foreach (['GOS1'  => $gos->isEligibleGos1($patient),
+                  'GOS3'  => $gos->isEligibleGos3($patient),
+                  'GOS6'  => $gos->isEligibleGos6($patient),
+                  'GOS18' => false] as $formType => $eligible) {
             PatientGosForm::updateOrCreate(
                 ['patient_id' => $patient->id, 'form_type' => $formType],
                 ['is_eligible' => $eligible]
