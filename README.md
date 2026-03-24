@@ -1,18 +1,18 @@
 # HomeOptic
 
-A domiciliary optician management system built for **Psk Locum Cover Ltd** — a mobile optometry service that visits patients at home. Built as a technical assignment using **Claude Code** as the primary agentic AI development tool.
+A domiciliary optician management system built for **Psk Locum Cover Ltd** - a mobile optometry service that visits patients at home. Built as a technical assignment using **Claude Code** as the primary agentic AI development tool.
 
 ---
 
 ## The Brief
 
-Father dearest is a qualified optician who is looking to start his own domiciliary service — visiting patients at home, typically elderly people who can't travel to a practice. To understand the domain properly before building anything, I researched Blink OMS, a real commercial optician management platform used by an existing practice. I used Blink as the reference for this prototype, basing the data model and workflows on a proven real-world system rather than guessing at requirements.
+Father dearest is a qualified optician who is looking to start his own domiciliary service - visiting patients at home, typically elderly people who can't travel to a practice. To understand the domain properly before building anything, I researched Blink OMS, a real commercial optician management platform used by an existing practice. I used Blink as the reference for this prototype, basing the data model and workflows on a proven real-world system rather than guessing at requirements.
 
 ![Homepage](screenshots/Homepage.png)
-*Public-facing homepage — service overview with mobile-responsive navigation*
+*Public-facing homepage - service overview with mobile-responsive navigation*
 
 ![Public Booking](screenshots/Bookings.png)
-*Online appointment request — step-by-step booking flow with time slot selection*
+*Online appointment request - step-by-step booking flow with time slot selection*
 
 ![Confirmed Booking](screenshots/ConfirmedBooking.png)
 *Booking confirmation screen shown to patients after submitting a request*
@@ -28,16 +28,16 @@ npm install -g @anthropic/claude-code
 claude  # authenticates via browser with your Anthropic account
 ```
 
-Claude Code is an agentic CLI tool that reads and writes files directly in your project. Unlike pasting code from a chat interface, it works conversationally inside your codebase — proposing changes, running commands, checking output, and iterating.
+Claude Code is an agentic CLI tool that reads and writes files directly in your project. Unlike pasting code from a chat interface, it works conversationally inside your codebase - proposing changes, running commands, checking output, and iterating.
 
-My workflow was deliberately structured: I spent the first sessions planning and agreeing architecture *before* any code was written. Claude Code's transcript shows this clearly — schema design, OOP pattern decisions, and open questions were all resolved in discussion first.
+My workflow was deliberately structured: I spent the first sessions planning and agreeing architecture *before* any code was written. Claude Code's transcript shows this clearly - schema design, OOP pattern decisions, and open questions were all resolved in discussion first.
 
 ---
 
 ## Tech Stack
 
 - **Laravel 13.1** / PHP 8.3
-- **SQLite** (local development — zero config, ships with Laravel 13)
+- **SQLite** (local development - zero config, ships with Laravel 13)
 - **Laravel Breeze** (Blade stack) for authentication
 - **Laravel Queues** (database driver) for background jobs
 - **Alpine.js** for interactive UI components
@@ -86,28 +86,28 @@ php artisan reminders:send-day-before --date=2026-03-21
 - Social & Benefits section: full-time education status, benefits received (Income Support, Universal Credit, Pension Credit, etc.), next of kin, emergency contact, carer details
 - Patient search with filters: name, ID, DOB, postcode, patient type, glaucoma, diabetic flags
 - Default sort by latest, with sort options (Latest, Oldest, Surname A-Z, Surname Z-A)
-- Patient documents section — upload and download PDFs attached to a patient's profile
-- Audit trail on examinations — last edited by and timestamp
+- Patient documents section - upload and download PDFs attached to a patient's profile
+- Audit trail on examinations - last edited by and timestamp
 
 ![Patients Index](screenshots/Patients.png)
 *Patient list with search and sort filters*
 
 ![New Patient](screenshots/New_Patient.png)
-*Patient creation form — personal, contact, address, medical, and social/benefits fields*
+*Patient creation form - personal, contact, address, medical, and social/benefits fields*
 
 ![View Patient](screenshots/View_Patient.png)
-*Patient profile — GOS eligibility badges, examination history, and document attachments*
+*Patient profile - GOS eligibility badges, examination history, and document attachments*
 
 ![Patient Attachments](screenshots/Patient_Attachments.png)
-*Document upload and download — PDFs attached directly to the patient record*
+*Document upload and download - PDFs attached directly to the patient record*
 
 ### GOS Eligibility
 - Automatic GOS1, GOS3, and GOS6 eligibility calculation based on patient data (age, medical conditions, benefits)
-- Admin override with reason — can manually mark eligible/not eligible per form
+- Admin override with reason - can manually mark eligible/not eligible per form
 - Eligibility recalculates immediately on every patient update
-- **GOS1** — free NHS sight test eligibility
-- **GOS3** — NHS optical voucher eligibility (correctly excludes age >= 60 as a standalone criterion)
-- **GOS6** — mobile/domiciliary sight test (requires GOS1 eligibility + domiciliary reason)
+- **GOS1** - free NHS sight test eligibility
+- **GOS3** - NHS optical voucher eligibility (correctly excludes age >= 60 as a standalone criterion)
+- **GOS6** - mobile/domiciliary sight test (requires GOS1 eligibility + domiciliary reason)
 
 ### GOS Forms (Printable)
 - Full recreation of official NHS GOS1, GOS3, and GOS6 forms as HTML/Blade views
@@ -117,29 +117,29 @@ php artisan reminders:send-day-before --date=2026-03-21
 - Native browser date pickers on all date fields
 - Print button triggers browser print-to-PDF
 - Save Form button saves filled form data to the eGOS submissions system
-- Back button is context-aware — returns to patient profile or eGOS page depending on origin
+- Back button is context-aware - returns to patient profile or eGOS page depending on origin
 
 ![eGOS Form](screenshots/eGOS_Form.png)
-*GOS form — patient data pre-filled, eligibility checkboxes auto-ticked, canvas signature pad*
+*GOS form - patient data pre-filled, eligibility checkboxes auto-ticked, canvas signature pad*
 
 ### eGOS Claims Management
 - Dedicated eGOS page (Diary -> Patients -> eGOS in navigation)
 - Table showing: patient, form type, voucher value, batch reference, submitted date, status badge
 - Filters: date range, form type, status, patient name/ID
 - Individual status management per submission
-- **Batch Submit** — select multiple submissions, generates a BATCH-YYYYMMDD-XXXX reference and marks all as Awaiting Confirmation
-- **Batch Mark Paid** — marks selected submissions as Accepted
+- **Batch Submit** - select multiple submissions, generates a BATCH-YYYYMMDD-XXXX reference and marks all as Awaiting Confirmation
+- **Batch Mark Paid** - marks selected submissions as Accepted
 - Delete submissions (unsubmitted only)
-- Form data saved per submission — reopening a saved form repopulates all fields
+- Form data saved per submission - reopening a saved form repopulates all fields
 
 ![eGOS Batch](screenshots/eGOS_Batch.png)
-*eGOS claims table — batch submit, batch mark paid, date/type/status filters*
+*eGOS claims table - batch submit, batch mark paid, date/type/status filters*
 
 ### Appointment Diary
 - Week and day view time-grid calendar (08:00-20:00)
 - Appointment blocks absolutely positioned by time, sized by duration
 - Colour-coded by status: Booked (green), Confirmed (blue), Completed (purple), Did Not Attend (red), Cancelled (grey)
-- Click-to-book — hover shows green (free) or red (taken) highlight; clicking an empty slot opens the booking form pre-filled with date and time
+- Click-to-book - hover shows green (free) or red (taken) highlight; clicking an empty slot opens the booking form pre-filled with date and time
 - Click appointment block to edit
 - Live patient search autocomplete on booking form (search by name or ID)
 - + New Patient button on booking form opens patient creation in new tab
@@ -149,16 +149,16 @@ php artisan reminders:send-day-before --date=2026-03-21
 - Conflict error display with form repopulation on validation failure
 
 ![Diary](screenshots/Diary.png)
-*Week-view time-grid — colour-coded appointments, click-to-book slot detection*
+*Week-view time-grid - colour-coded appointments, click-to-book slot detection*
 
 ### Examination Records
 - Spectacle examination workflow with four tabs:
-  - **History & Symptoms** — GOS eligibility, last exam date, reason for visit, POH, GH, medication notes, medication checkboxes (54 medications), FH, FOH, patient flags. Set Default buttons per text field.
-  - **Ophthalmoscopy** — Right and Left eye findings with full dropdown options for all 13 fields (Pupils, Lids & Lashes, Lashes, Conjunctiva, Cornea, Sclera, Anterior Chamber, Media, C/D Ratio, A/V Ratio, Fundus Periphery, Macular, Ret. Grading). Set Default (R) and Set Default (L) buttons. Copy Right to Left button.
-  - **Further Investigative Techniques** — IOP (Pre/Post) with method dropdowns and Now buttons, Cover Test dropdowns, OMB, Visual Fields, Motility, Amsler Value, Keratometry, NPC, Stereopsis, Colour Vision, Amplitude of Accommodation
-  - **Refraction** — Current/Previous Rx, Retinoscopy, Subjective Refraction with full prescription table (SPH, CYL, Axis, Prism with diagonal direction support, VA, Near Add, Int Add, Acuity dropdowns), PD measurements, Outcome, Recommendations, NHS Voucher dropdowns (A-D single vision, E-H bifocal), Retest, Examination Comment
-- Carry-forward from previous signed examination — History, medication, GOS context, IOP method, and colour vision pre-filled on new exams
-- Tab memory — saving a tab returns to that tab, not the first tab
+  - **History & Symptoms** - GOS eligibility, last exam date, reason for visit, POH, GH, medication notes, medication checkboxes (54 medications), FH, FOH, patient flags. Set Default buttons per text field.
+  - **Ophthalmoscopy** - Right and Left eye findings with full dropdown options for all 13 fields (Pupils, Lids & Lashes, Lashes, Conjunctiva, Cornea, Sclera, Anterior Chamber, Media, C/D Ratio, A/V Ratio, Fundus Periphery, Macular, Ret. Grading). Set Default (R) and Set Default (L) buttons. Copy Right to Left button.
+  - **Further Investigative Techniques** - IOP (Pre/Post) with method dropdowns and Now buttons, Cover Test dropdowns, OMB, Visual Fields, Motility, Amsler Value, Keratometry, NPC, Stereopsis, Colour Vision, Amplitude of Accommodation
+  - **Refraction** - Current/Previous Rx, Retinoscopy, Subjective Refraction with full prescription table (SPH, CYL, Axis, Prism with diagonal direction support, VA, Near Add, Int Add, Acuity dropdowns), PD measurements, Outcome, Recommendations, NHS Voucher dropdowns (A-D single vision, E-H bifocal), Retest, Examination Comment
+- Carry-forward from previous signed examination - History, medication, GOS context, IOP method, and colour vision pre-filled on new exams
+- Tab memory - saving a tab returns to that tab, not the first tab
 - Sign-off button stamps signed_at and triggers PDF generation job
 - Audit tracking: last_edited_by and last_edited_at on every save
 - Delete unsigned examinations (signed examinations are protected)
@@ -180,12 +180,12 @@ Appointment created
           -> appointment.notified_at stamped
 ```
 
-#### Strategy Pattern — Notification Channels
-- `EmailNotificationStrategy` — sends real email via Laravel Mail (log driver locally, SMTP in production)
-- `SmsNotificationStrategy` — stub, logs intent
-- `LetterNotificationStrategy` — fallback stub, logs intent
+#### Strategy Pattern - Notification Channels
+- `EmailNotificationStrategy` - sends real email via Laravel Mail (log driver locally, SMTP in production)
+- `SmsNotificationStrategy` - stub, logs intent
+- `LetterNotificationStrategy` - fallback stub, logs intent
 - Factory selects: Email if patient has email -> SMS if mobile but no email -> Letter as fallback
-- Every patient gets a notification attempt — no silent skips
+- Every patient gets a notification attempt - no silent skips
 
 #### Day-Before Reminders
 - Scheduled command `reminders:send-day-before` runs daily at 08:00
@@ -200,7 +200,7 @@ Appointment created
 - Download link appears on patient profile examination history
 
 ![Notifications](screenshots/Notifications.png)
-*Admin notifications panel — reminder queue status and channel strategy*
+*Admin notifications panel - reminder queue status and channel strategy*
 
 ---
 
@@ -216,7 +216,7 @@ Appointment created
 | Observer | `app/Observers/AppointmentObserver` | Appointment created -> reminder job dispatched |
 | Observer | `app/Observers/ExaminationObserver` | Exam signed -> PDF generation job dispatched (uses wasChanged('signed_at')) |
 | Strategy | `app/Notifications/Strategies/` | Swappable notification channels (Email/SMS/Letter) |
-| ~~Singleton~~ | n/a | Laravel's service container already manages singleton bindings — adding PHP Singleton would undermine testability |
+| ~~Singleton~~ | n/a | Laravel's service container already manages singleton bindings - adding PHP Singleton would undermine testability |
 
 ### Repository Pattern with Interfaces
 
@@ -224,12 +224,12 @@ Each repository has a contract in `app/Contracts/` and an Eloquent implementatio
 
 ### ExaminationFactory Transaction
 
-Without the transaction, a failure on any child row would leave an orphaned examination record with only some of its tabs — breaking every eager-load that expects all four tabs to exist.
+Without the transaction, a failure on any child row would leave an orphaned examination record with only some of its tabs - breaking every eager-load that expects all four tabs to exist.
 
 ### Key Architectural Decisions
 
 **Flat columns on `exam_refraction` (93 columns)**
-Rejected normalised `exam_rx_entries` approach after walking through the actual Eloquent query — 8 `updateOrCreate` calls per save and groupBy gymnastics on every load, with no benefit for a form-render-and-save use case.
+Rejected normalised `exam_rx_entries` approach after walking through the actual Eloquent query - 8 `updateOrCreate` calls per save and groupBy gymnastics on every load, with no benefit for a form-render-and-save use case.
 
 **RESTRICT (not SET NULL) on patient FK relationships**
 Silently nulling a patient's GP association when a doctor is deleted would be a data integrity risk in a medical system. RESTRICT forces the user to explicitly reassign patients first.
@@ -244,7 +244,7 @@ Silently nulling a patient's GP association when a doctor is deleted would be a 
 The original job silently skipped if a patient had no email. The Strategy pattern ensures every patient gets a notification attempt through the appropriate channel. No silent skips in a medical system.
 
 **ExaminationObserver hook**
-Uses `updated` with `wasChanged('signed_at')` rather than `created`. The exam record is blank on creation — PDF should only generate on sign-off.
+Uses `updated` with `wasChanged('signed_at')` rather than `created`. The exam record is blank on creation - PDF should only generate on sign-off.
 
 ---
 
