@@ -13,7 +13,7 @@ class PatientGosFormController extends Controller
 {
     public function showForm(Request $request, Patient $patient, string $formType): View
     {
-        abort_unless(in_array($formType, ['GOS1', 'GOS3', 'GOS6']), 404);
+        abort_unless(in_array($formType, ['GOS1', 'GOS3', 'GOS6', 'GOS18']), 404);
         $patient->load(['practice', 'doctor']);
         $source = $request->query('from') === 'egos' ? 'egos' : 'patient';
         $existingSubmission = GosSubmission::where('patient_id', $patient->id)
