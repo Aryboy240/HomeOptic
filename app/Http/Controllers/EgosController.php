@@ -60,7 +60,7 @@ class EgosController extends Controller
     {
         $validated = $request->validate([
             'patient_id'    => ['required', 'integer', 'exists:patients,id'],
-            'form_type'     => ['required', 'string', 'in:GOS1,GOS3,GOS6'],
+            'form_type'     => ['required', 'string', 'in:GOS1,GOS3,GOS6,GOS18'],
             'form_data'     => ['nullable', 'array'],
             'voucher_value' => ['nullable', 'numeric', 'min:0'],
         ]);

@@ -21,9 +21,8 @@ class GosEligibilityService
     /**
      * GOS1 — routine NHS sight test.
      *
-     * patient_type is NOT used as a primary eligibility criterion (a Private patient
-     * can still qualify via age, medical condition, or benefits). The only type-based
-     * criterion is FamilyHistory of glaucoma, which requires age >= 40.
+     * patient_type is NOT used as a primary eligibility criterion.
+     * The only type-based criterion is FamilyHistory of glaucoma, which requires age >= 40.
      */
     public function isEligibleGos1(Patient $patient): bool
     {
@@ -47,6 +46,10 @@ class GosEligibilityService
 
         if ($patient->patient_type === PatientType::FamilyHistory && $age >= 40) {
             return true;
+        }
+
+        if ($patient->patient_type === PatientType::Private) {
+            return false;
         }
 
         return $this->hasEligibleBenefit($patient);
@@ -79,6 +82,10 @@ class GosEligibilityService
             return true;
         }
 
+        if ($patient->patient_type === PatientType::Private) {
+            return false;
+        }
+
         return $this->hasEligibleBenefit($patient);
     }
 
@@ -88,6 +95,11 @@ class GosEligibilityService
      */
     public function isEligibleGos6(Patient $patient): bool
     {
+
+        if ($patient->patient_type === PatientType::Private) {
+            return false;
+        }
+        
         return $this->isEligibleGos1($patient) && $patient->domiciliary_reason !== null;
     }
 

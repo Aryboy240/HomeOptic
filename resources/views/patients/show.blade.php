@@ -385,75 +385,13 @@
                         </div>
                     @endforeach
 
-                    {{-- GOS18 — Ophthalmic Referral/Information for GP (manual-only, never auto-eligible) --}}
-                    @php $gos18form = $gosforms['GOS18'] ?? null; $gos18eligible = $gos18form?->effectiveEligibility() ?? false; @endphp
-                    <div class="px-5 py-4" x-data="{ open: false }">
+                    {{-- GOS18 — Ophthalmic Referral/Information for GP (no eligibility — fill form only) --}}
+                    <div class="px-5 py-4">
                         <div class="flex items-center justify-between gap-4">
-                            <div class="flex items-center gap-3">
-                                <span class="text-sm font-medium text-gray-800 dark:text-gray-100">GOS18 — Ophthalmic Referral / Information for GP</span>
-                                @if($gos18eligible)
-                                    <span style="background:#dcfce7; color:#15803d;" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium">Eligible</span>
-                                @else
-                                    <span style="background:#fee2e2; color:#b91c1c;" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium">Not Eligible</span>
-                                @endif
-                                @if($gos18form && $gos18form->admin_override !== null)
-                                    <span class="text-xs text-gray-400 dark:text-gray-500 italic">Manually overridden</span>
-                                @endif
-                            </div>
-                            <div class="flex items-center gap-3">
-                                {{-- Fill Form always shown for GOS18 --}}
-                                <a href="{{ route('patients.gos.form', [$patient, 'GOS18']) }}"
-                                   class="text-xs font-medium px-2 py-1 rounded text-white"
-                                   style="background:#003087;">Fill Form</a>
-                                <button type="button" @click="open = !open"
-                                    class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
-                                    <span x-show="!open">Override &darr;</span>
-                                    <span x-show="open" x-cloak>Close &uarr;</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        @if($gos18form && $gos18form->override_note)
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 italic">Note: {{ $gos18form->override_note }}</p>
-                        @endif
-
-                        <div x-show="open" x-cloak class="mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-600">
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">GOS18 eligibility is manual-only. Override to mark this patient as eligible for submission.</p>
-                            <div class="flex flex-wrap gap-2 items-end">
-                                <form method="POST" action="{{ route('patients.gos.update', [$patient, 'GOS18']) }}" class="flex flex-wrap gap-2 items-end">
-                                    @csrf
-                                    <input type="hidden" name="admin_override" value="1">
-                                    <div>
-                                        <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Override note (optional)</label>
-                                        <input type="text" name="override_note" value="{{ $gos18form?->override_note }}"
-                                            placeholder="Reason for override"
-                                            class="text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 w-56">
-                                    </div>
-                                    <button type="submit"
-                                        style="background:#15803d; color:#fff;"
-                                        class="px-3 py-1.5 text-xs font-medium rounded-md hover:opacity-90">
-                                        Mark Eligible
-                                    </button>
-                                </form>
-                                <form method="POST" action="{{ route('patients.gos.update', [$patient, 'GOS18']) }}">
-                                    @csrf
-                                    <input type="hidden" name="admin_override" value="0">
-                                    <button type="submit"
-                                        style="background:#b91c1c; color:#fff;"
-                                        class="px-3 py-1.5 text-xs font-medium rounded-md hover:opacity-90">
-                                        Mark Not Eligible
-                                    </button>
-                                </form>
-                                @if($gos18form && $gos18form->admin_override !== null)
-                                    <form method="POST" action="{{ route('patients.gos.clear', [$patient, 'GOS18']) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
-                                            Clear Override
-                                        </button>
-                                    </form>
-                                @endif
-                            </div>
+                            <span class="text-sm font-medium text-gray-800 dark:text-gray-100">GOS18 — Ophthalmic Referral / Information for GP</span>
+                            <a href="{{ route('patients.gos.form', [$patient, 'GOS18']) }}"
+                               class="text-xs font-medium px-2 py-1 rounded text-white"
+                               style="background:#003087;">Fill Form</a>
                         </div>
                     </div>
                 </div>
