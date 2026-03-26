@@ -21,9 +21,9 @@ class DatabaseSeeder extends Seeder
     {
         // Default optometrist / admin account
         User::firstOrCreate(
-            ['email' => 'p.kora@sky.com'],
+            ['email' => 'admin@homeoptic.test'],
             [
-                'name'     => 'Prem Kora',
+                'name'     => 'Admin User',
                 'password' => Hash::make('password'),
             ]
         );
