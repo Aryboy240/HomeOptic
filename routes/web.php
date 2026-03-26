@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminNotificationController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\DiaryController;
 use App\Http\Controllers\EgosController;
@@ -82,6 +83,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/notifications/{notification}/read', [AdminNotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/admin/pending-bookings/{pendingBooking}/approve', [AdminNotificationController::class, 'approve'])->name('bookings.approve');
     Route::post('/admin/pending-bookings/{pendingBooking}/decline', [AdminNotificationController::class, 'decline'])->name('bookings.decline');
+
+    // ── Admin User Management ─────────────────────────────────────────────────
+    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+    Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store');
+    Route::delete('/admin/users/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
 });
 
 require __DIR__.'/auth.php';

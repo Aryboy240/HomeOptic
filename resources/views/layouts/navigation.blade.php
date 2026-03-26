@@ -84,6 +84,12 @@
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
+                        <x-dropdown-link :href="route('admin.users.index')">
+                            {{ __('User Management') }}
+                        </x-dropdown-link>
+
+                        <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -162,6 +168,10 @@
 
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('admin.users.index')">
+                    {{ __('Users') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->

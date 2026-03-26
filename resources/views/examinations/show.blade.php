@@ -45,7 +45,7 @@
             @endif
 
             {{-- Tab bar --}}
-            <div class="border-b border-gray-200 dark:border-gray-700 mb-6 overflow-x-auto">
+            <div class="border-b border-gray-200 dark:border-gray-700 mb-6 overflow-x-auto overflow-y-hidden">
                 <nav class="-mb-px flex space-x-6 min-w-max">
                     @foreach([
                         'history'       => 'History & Symptoms',
