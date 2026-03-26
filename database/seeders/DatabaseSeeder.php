@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
      * Seed the application's database.
      *
      * Credentials for the default admin account:
-     *   Email:    p.kora@sky.com
+     *   Email:    admin@homeoptic.test
      *   Password: password
      */
     public function run(): void
