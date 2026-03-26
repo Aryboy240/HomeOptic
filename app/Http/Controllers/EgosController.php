@@ -51,7 +51,7 @@ class EgosController extends Controller
         return view('egos.index', [
             'submissions' => $submissions,
             'statuses'    => GosSubmissionStatus::options(),
-            'formTypes'   => ['GOS1' => 'GOS1', 'GOS3' => 'GOS3', 'GOS6' => 'GOS6'],
+            'formTypes'   => ['GOS1' => 'GOS1', 'GOS3' => 'GOS3', 'GOS6' => 'GOS6', 'GOS18' => 'GOS18'],
             'filters'     => $request->only(['date_from', 'date_to', 'form_type', 'status', 'patient']),
         ]);
     }
