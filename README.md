@@ -171,9 +171,43 @@ Appointment created
 | Observer | `app/Observers/ExaminationObserver` | Exam signed → PDF job dispatched (guards on `wasChanged('signed_at')`) |
 | Strategy | `app/Notifications/Strategies/` | Swappable notification channels |
 
-The ExaminationFactory's transaction matters: without it, a failure on any child row leaves an orphaned exam record with missing tabs, which breaks every eager-load that expects all four to exist.
+---
 
-The ExaminationObserver hooks into `updated` rather than `created` because the exam record is blank when first created - the PDF should only generate at sign-off.
+#### Repository
+
+Controllers don't talk to the database directly — they go through an interface in `app/Contracts/`, backed by an Eloquent implementation in `app/Repositories/`. Both repositories are bound in `RepositoryServiceProvider`, so swapping to a cached or test implementation later is a single line change. `EloquentPatientRepository::search()` handles all nine patient filters in one place rather than scattering query logic across controllers.
+
+![Repository UML](screenshots/Repository.png)
+*Repository pattern — controller depends on the interface, not the Eloquent implementation*
+
+---
+
+#### Factory
+
+Two factories are in play. `ExaminationFactory` wraps exam creation in a `DB::transaction()` — it creates the parent `examinations` row plus all four child tab rows atomically. Without the transaction, a failure halfway through leaves an orphaned exam with missing tabs that breaks every eager-load expecting all four to exist. `NotificationStrategyFactory` is simpler: it inspects a patient's contact details and returns the right notification strategy instance.
+
+![Factory UML](screenshots/Factory.png)
+*Factory pattern — ExaminationFactory creates all five rows atomically; NotificationStrategyFactory selects the notification channel*
+
+---
+
+#### Observer, Queue & Strategy Chain
+
+`AppointmentObserver` and `ExaminationObserver` are registered in `AppServiceProvider::boot()`. When an appointment is created, the observer dispatches `SendAppointmentReminderJob` onto the queue. The job calls `NotificationStrategyFactory`, which returns the right strategy (Email → SMS → Letter fallback), and the strategy executes. The ExaminationObserver guards on `wasChanged('signed_at')` so the PDF job only fires at sign-off, not on every edit.
+
+![Observer + Queue + Strategy Chain UML](screenshots/Observer+Queue+Strategy Chain.png)
+*Full chain — Observer triggers the job, job delegates to the Strategy via the Factory*
+
+---
+
+#### Strategy
+
+Three notification strategies live in `app/Notifications/Strategies/`, all implementing the same `NotificationStrategy` interface: `EmailNotificationStrategy` (sends a real Mailable), `SmsNotificationStrategy` (stub, logs intent), and `LetterNotificationStrategy` (fallback stub). The factory selects the right one at runtime based on what contact details the patient has. Adding a new channel — push notification, for example — means writing one new class and updating the factory condition, nothing else changes.
+
+![Strategy UML](screenshots/Strategy.png)
+*Strategy pattern — swappable notification channels behind a shared interface*
+
+---
 
 ### Key Decisions
 
