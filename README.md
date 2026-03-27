@@ -195,7 +195,7 @@ Two factories are in play. `ExaminationFactory` wraps exam creation in a `DB::tr
 
 `AppointmentObserver` and `ExaminationObserver` are registered in `AppServiceProvider::boot()`. When an appointment is created, the observer dispatches `SendAppointmentReminderJob` onto the queue. The job calls `NotificationStrategyFactory`, which returns the right strategy (Email → SMS → Letter fallback), and the strategy executes. The ExaminationObserver guards on `wasChanged('signed_at')` so the PDF job only fires at sign-off, not on every edit.
 
-![Observer + Queue + Strategy Chain UML](screenshots/Observer+Queue+Strategy Chain.png)
+![Observer + Queue + Strategy Chain UML](screenshots/Observer+Queue+Strategy%20Chain.png)
 *Full chain — Observer triggers the job, job delegates to the Strategy via the Factory*
 
 ---
